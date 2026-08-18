@@ -7,6 +7,7 @@ import { getTodayString, formatDatePretty } from '@/lib/tracker';
 import { initStorage, saveStudyData, loadLocalData } from '@/lib/storage';
 import FormattedNote from '@/components/FormattedNote';
 import RichWordEditor from '@/components/RichWordEditor';
+import { voicePlayer } from '@/lib/audioPlayer';
 
 function ReviewContent() {
   const router = useRouter();
@@ -41,6 +42,10 @@ function ReviewContent() {
       if (data.studyDates) setStudyDates(data.studyDates);
       if (data.studyNotes) setStudyNotes(data.studyNotes);
     });
+
+    return () => {
+      voicePlayer.stop();
+    };
   }, []);
 
   const today = getTodayString();
@@ -56,10 +61,8 @@ function ReviewContent() {
   const currentIndex = datesWithNotes.indexOf(currentDate);
 
   const navigateToDate = (targetDate) => {
-    if (isSpeaking) {
-      window.speechSynthesis?.cancel();
-      setIsSpeaking(false);
-    }
+    voicePlayer.stop();
+    setIsSpeaking(false);
     setIsEditing(false);
     router.push(`/review?date=${targetDate}`);
   };
@@ -86,30 +89,19 @@ function ReviewContent() {
     }
   };
 
-  // Text-to-Speech (TTS)
+  // Google Translation Voice Player with Natural Multi-Language Detection
   const handleTTS = () => {
-    if (!('speechSynthesis' in window)) {
-      alert('Trình duyệt không hỗ trợ Text-to-Speech.');
-      return;
-    }
-
     if (isSpeaking) {
-      window.speechSynthesis.cancel();
+      voicePlayer.stop();
       setIsSpeaking(false);
       return;
     }
 
     if (!rawNote) return;
 
-    const utterance = new SpeechSynthesisUtterance(rawNote);
-    utterance.lang = 'en-US';
-    utterance.rate = 0.9;
-
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-
-    window.speechSynthesis.speak(utterance);
+    voicePlayer.play(rawNote, (playing) => {
+      setIsSpeaking(playing);
+    });
   };
 
   // Copy to clipboard
@@ -210,7 +202,7 @@ function ReviewContent() {
                   ? 'bg-red-50 text-red-600 hover:bg-red-100'
                   : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700'
               } disabled:opacity-40 disabled:cursor-not-allowed`}
-              title="Nghe phát âm tiếng Anh"
+              title="Nghe đọc bài học tự nhiên với giọng Google Translate"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -220,7 +212,7 @@ function ReviewContent() {
                   d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
                 />
               </svg>
-              <span>{isSpeaking ? 'Dừng đọc ⏹️' : 'Nghe đọc (TTS)'}</span>
+              <span>{isSpeaking ? 'Dừng đọc ⏹️' : 'Đọc bài (Google Voice) 🔊'}</span>
             </button>
 
             <button

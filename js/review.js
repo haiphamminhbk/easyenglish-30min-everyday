@@ -6,6 +6,7 @@ import { init3DBackground } from './background3d.js';
 import { initStorage, saveStudyData, loadLocalData } from './storage.js';
 import { formatDatePretty, getTodayString } from './tracker.js';
 import { setupWordEditor, updateWordCount, renderFormattedText } from './editor.js';
+import { voicePlayer } from './audioPlayer.js';
 
 // DOM Elements
 const lessonDateDisplay = document.getElementById('lessonDateDisplay');
@@ -121,7 +122,7 @@ function renderLesson(date) {
 
     // Reset TTS state if date changed
     if (isSpeaking) {
-        window.speechSynthesis.cancel();
+        voicePlayer.stop();
         setTtsButtonState(false);
     }
 }
@@ -139,21 +140,16 @@ function setTtsButtonState(speaking) {
     } else {
         ttsBtn.classList.remove('bg-red-50', 'text-red-600');
         ttsBtn.classList.add('bg-indigo-50', 'text-indigo-700');
-        ttsBtnText.textContent = 'Nghe đọc (TTS)';
+        ttsBtnText.textContent = 'Đọc bài (Google Voice) 🔊';
     }
 }
 
 /**
- * Handles Text-to-Speech playback
+ * Handles Google Translation voice playback with language detection
  */
 function handleTTS() {
-    if (!('speechSynthesis' in window)) {
-        alert('Trình duyệt của bạn không hỗ trợ Text-to-Speech.');
-        return;
-    }
-
     if (isSpeaking) {
-        window.speechSynthesis.cancel();
+        voicePlayer.stop();
         setTtsButtonState(false);
         return;
     }
@@ -161,15 +157,9 @@ function handleTTS() {
     const rawNote = studyNotes[currentDate];
     if (!rawNote || !rawNote.trim()) return;
 
-    const utterance = new SpeechSynthesisUtterance(rawNote);
-    utterance.lang = 'en-US'; // English pronunciation
-    utterance.rate = 0.9; // Slightly slower for clear learning
-
-    utterance.onstart = () => setTtsButtonState(true);
-    utterance.onend = () => setTtsButtonState(false);
-    utterance.onerror = () => setTtsButtonState(false);
-
-    window.speechSynthesis.speak(utterance);
+    voicePlayer.play(rawNote, (playing) => {
+        setTtsButtonState(playing);
+    });
 }
 
 /**
