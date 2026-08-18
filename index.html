@@ -72,25 +72,36 @@
             Hoàn thành 30 phút! 🚀
         </button>
 
-        <!-- 30-Day Tracker Grid Section -->
+        <!-- Monthly Calendar Grid Section -->
         <section>
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Tiến độ 30 ngày qua</h3>
-                <span id="periodDisplay" class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-md">Lịch sử</span>
+                <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wide">Tiến độ theo tháng</h3>
+                <span id="periodDisplay" class="text-xs text-gray-500 bg-gray-100 px-2.5 py-1 rounded-md font-medium">Lịch sử</span>
+            </div>
+
+            <!-- Weekday Headers -->
+            <div class="grid grid-cols-7 gap-2 mb-2 text-center text-xs font-bold text-gray-400">
+                <div class="py-0.5">T2</div>
+                <div class="py-0.5">T3</div>
+                <div class="py-0.5">T4</div>
+                <div class="py-0.5">T5</div>
+                <div class="py-0.5">T6</div>
+                <div class="py-0.5">T7</div>
+                <div class="py-0.5">CN</div>
             </div>
             
-            <!-- Grid: 6 cols on mobile (6x5=30), 10 cols on desktop (10x3=30) -->
-            <div class="grid grid-cols-6 sm:grid-cols-10 gap-2" id="trackerGrid">
+            <!-- Grid: 7 cols with weekday alignment -->
+            <div class="grid grid-cols-7 gap-2 sm:gap-2.5" id="trackerGrid">
                 <!-- Javascript populates day boxes -->
             </div>
 
             <!-- Navigation Buttons -->
             <div class="flex items-center justify-between mt-6 gap-4">
-                <button id="prevBtn" class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200 active:scale-95">
-                    ← Trước
+                <button id="prevBtn" class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200 active:scale-95 text-xs sm:text-sm">
+                    ← Tháng trước
                 </button>
-                <button id="nextBtn" class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200 active:scale-95">
-                    Sau →
+                <button id="nextBtn" class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200 active:scale-95 text-xs sm:text-sm">
+                    Tháng sau →
                 </button>
             </div>
         </section>

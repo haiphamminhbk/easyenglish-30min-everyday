@@ -6,9 +6,8 @@ import {
   getTodayString,
   formatDatePretty,
   calculateStreak,
-  getPeriodRange,
+  getMonthCalendar,
   stripFormatting,
-  NUMBER_OF_DAYS_TO_SHOW,
 } from '@/lib/tracker';
 import { initStorage, saveStudyData, saveUsername, loadLocalData } from '@/lib/storage';
 import NoteModal from '@/components/NoteModal';
@@ -21,7 +20,7 @@ export default function TrackerPage() {
   const [studyDates, setStudyDates] = useState([]);
   const [studyNotes, setStudyNotes] = useState({});
   const [savedUserName, setSavedUserName] = useState('bạn');
-  const [currentPeriodOffset, setCurrentPeriodOffset] = useState(0);
+  const [currentMonthOffset, setCurrentMonthOffset] = useState(0);
 
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [isNameModalOpen, setIsNameModalOpen] = useState(false);
@@ -86,18 +85,18 @@ export default function TrackerPage() {
     await saveUsername(newName);
   };
 
-  // Date range for current 30-day window
-  const { startDate, startStr, endStr } = getPeriodRange(currentPeriodOffset, NUMBER_OF_DAYS_TO_SHOW);
+  // Month data for current month offset
+  const monthData = getMonthCalendar(currentMonthOffset);
+  const completedInMonth = monthData.days.filter((d) => studyDates.includes(d.dateStr)).length;
+  const WEEKDAYS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+  const TOTAL_CALENDAR_SLOTS = 42; // Always 6 rows x 7 columns for fixed, jitter-free height
+  const trailingPaddingCount = Math.max(
+    0,
+    TOTAL_CALENDAR_SLOTS - monthData.startDayIndex - monthData.daysInMonth
+  );
 
-  const daysGrid = Array.from({ length: NUMBER_OF_DAYS_TO_SHOW }).map((_, i) => {
-    const d = new Date(startDate);
-    d.setDate(d.getDate() + i);
-
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const dateStr = `${year}-${month}-${day}`;
-
+  const daysGrid = monthData.days.map((item) => {
+    const { day, dateStr } = item;
     const isCompleted = studyDates.includes(dateStr);
     const hasNote = Boolean(studyNotes[dateStr] && studyNotes[dateStr].trim());
     const isToday = dateStr === today;
@@ -214,16 +213,66 @@ export default function TrackerPage() {
           {isCompletedToday ? 'Đã hoàn thành mục tiêu hôm nay ✔️' : 'Hoàn thành 30 phút! 🚀'}
         </button>
 
-        {/* 30-Day Grid */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Tiến độ 30 ngày qua</h3>
-            <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-md">
-              {startStr} → {endStr}
-            </span>
+        {/* Monthly Calendar Section */}
+        <section className="calendar-card">
+          <div className="flex items-center justify-between mb-3.5">
+            <div className="flex items-center gap-2">
+              <span className="text-base">📅</span>
+              <h3 className="text-sm font-bold text-gray-800 tracking-wide uppercase">
+                {monthData.monthStr}
+              </h3>
+              {currentMonthOffset !== 0 && (
+                <button
+                  type="button"
+                  onClick={() => setCurrentMonthOffset(0)}
+                  className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/60 px-2 py-0.5 rounded-md transition-colors"
+                >
+                  Tháng này
+                </button>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200/80 px-2.5 py-1 rounded-full text-xs font-semibold shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>
+                {completedInMonth}/{monthData.daysInMonth} ngày
+              </span>
+            </div>
           </div>
 
-          <div className="grid grid-cols-6 sm:grid-cols-10 gap-2">
+          {/* Monthly Progress Bar */}
+          <div className="w-full bg-gray-100 rounded-full h-1.5 mb-4 overflow-hidden">
+            <div
+              className="bg-gradient-to-r from-indigo-500 to-emerald-500 h-1.5 rounded-full transition-all duration-500"
+              style={{
+                width: `${Math.round((completedInMonth / monthData.daysInMonth) * 100)}%`,
+              }}
+            />
+          </div>
+
+          {/* Weekday Headers */}
+          <div className="grid grid-cols-7 gap-2 mb-2 text-center text-[11px] font-bold tracking-wider">
+            {WEEKDAYS.map((w, idx) => {
+              const isWeekend = idx >= 5;
+              return (
+                <div
+                  key={w}
+                  className={`py-1 rounded-md ${
+                    isWeekend ? 'text-amber-600/90 bg-amber-50/60' : 'text-slate-400'
+                  }`}
+                >
+                  {w}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Monthly Days Grid - Fixed 6-row (42 slots) grid to prevent height shaking */}
+          <div className="grid grid-cols-7 gap-2 sm:gap-2.5">
+            {/* Blank padding cells before day 1 */}
+            {Array.from({ length: monthData.startDayIndex }).map((_, idx) => (
+              <div key={`lead-pad-${idx}`} className="aspect-square opacity-0 pointer-events-none" />
+            ))}
+
             {daysGrid.map((box) => (
               <div
                 key={box.dateStr}
@@ -231,29 +280,54 @@ export default function TrackerPage() {
                 data-title={box.tooltip}
                 className={`day-box ${box.isCompleted ? 'completed' : ''} ${
                   box.hasNote ? 'has-note' : ''
-                } ${box.isToday && !box.isCompleted ? 'today' : ''}`}
+                } ${box.isToday && !box.isCompleted ? 'today' : ''} ${
+                  box.isToday && box.isCompleted ? 'today completed' : ''
+                }`}
               >
-                {box.day}
+                <span>{box.day}</span>
                 {box.hasNote && <span className="note-dot" />}
               </div>
             ))}
+
+            {/* Trailing blank padding cells to guarantee exact 42-slot (6-row) fixed height */}
+            {Array.from({ length: trailingPaddingCount }).map((_, idx) => (
+              <div key={`trail-pad-${idx}`} className="aspect-square opacity-0 pointer-events-none" />
+            ))}
           </div>
 
-          {/* Period Navigation */}
-          <div className="flex items-center justify-between mt-6 gap-4">
+          {/* Legend */}
+          <div className="flex items-center justify-center gap-4 mt-4 pt-3 border-t border-slate-100 text-[11px] text-gray-500 flex-wrap">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-md bg-emerald-500 shadow-2xs" />
+              <span>Đã học 30p</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-white shadow-2xs" />
+              <span>Có ghi chú</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-md border-2 border-indigo-600 bg-indigo-50" />
+              <span>Hôm nay</span>
+            </span>
+          </div>
+
+          {/* Month Navigation */}
+          <div className="flex items-center justify-between mt-4 gap-3">
             <button
               type="button"
-              onClick={() => setCurrentPeriodOffset((prev) => prev - 1)}
-              className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200 active:scale-95"
+              onClick={() => setCurrentMonthOffset((prev) => prev - 1)}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-semibold rounded-xl transition-all duration-200 active:scale-95 text-xs sm:text-sm border border-slate-200/70"
             >
-              ← Trước
+              <span>←</span>
+              <span>Tháng trước</span>
             </button>
             <button
               type="button"
-              onClick={() => setCurrentPeriodOffset((prev) => prev + 1)}
-              className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200 active:scale-95"
+              onClick={() => setCurrentMonthOffset((prev) => prev + 1)}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 font-semibold rounded-xl transition-all duration-200 active:scale-95 text-xs sm:text-sm border border-slate-200/70"
             >
-              Sau →
+              <span>Tháng sau</span>
+              <span>→</span>
             </button>
           </div>
         </section>

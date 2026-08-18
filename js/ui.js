@@ -2,7 +2,7 @@
  * UI Components, Modals, and Grid Rendering
  */
 
-import { NUMBER_OF_DAYS_TO_SHOW, getTodayString, formatDatePretty, calculateStreak, getPeriodRange, stripFormatting } from './tracker.js';
+import { getTodayString, formatDatePretty, calculateStreak, getMonthCalendar, stripFormatting } from './tracker.js';
 import { setupWordEditor, updateWordCount } from './editor.js';
 
 // DOM Selectors Cache
@@ -159,7 +159,7 @@ export function updateAuthStatus(htmlContent) {
 }
 
 /**
- * Renders the 30-day tracker grid
+ * Renders the monthly tracker grid
  * @param {Object} options
  * @param {number} options.currentPeriodOffset
  * @param {string[]} options.studyDates
@@ -179,20 +179,22 @@ export function renderGrid({
     elements.trackerGrid.innerHTML = '';
     const todayStr = getTodayString();
     
-    const { startDate, startStr, endStr } = getPeriodRange(currentPeriodOffset, NUMBER_OF_DAYS_TO_SHOW);
+    const monthData = getMonthCalendar(currentPeriodOffset);
+    const completedInMonth = monthData.days.filter((d) => studyDates.includes(d.dateStr)).length;
     
     if (elements.periodDisplay) {
-        elements.periodDisplay.textContent = `${startStr} → ${endStr}`;
+        elements.periodDisplay.textContent = `${monthData.monthStr} (${completedInMonth}/${monthData.daysInMonth} ngày)`;
     }
 
-    for (let i = 0; i < NUMBER_OF_DAYS_TO_SHOW; i++) {
-        const d = new Date(startDate);
-        d.setDate(d.getDate() + i);
-        
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        const dateStr = `${year}-${month}-${day}`;
+    // Blank padding cells before day 1
+    for (let p = 0; p < monthData.startDayIndex; p++) {
+        const pad = document.createElement('div');
+        pad.className = 'aspect-square opacity-0 pointer-events-none';
+        elements.trackerGrid.appendChild(pad);
+    }
+
+    for (let i = 0; i < monthData.days.length; i++) {
+        const { day, dateStr } = monthData.days[i];
 
         const box = document.createElement('div');
         box.className = 'day-box';
@@ -243,6 +245,14 @@ export function renderGrid({
         }
 
         elements.trackerGrid.appendChild(box);
+    }
+
+    // Trailing blank padding cells to guarantee exact 42-slot (6-row) fixed height
+    const trailingPaddingCount = Math.max(0, 42 - monthData.startDayIndex - monthData.daysInMonth);
+    for (let t = 0; t < trailingPaddingCount; t++) {
+        const pad = document.createElement('div');
+        pad.className = 'aspect-square opacity-0 pointer-events-none';
+        elements.trackerGrid.appendChild(pad);
     }
 }
 
