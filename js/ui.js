@@ -3,6 +3,7 @@
  */
 
 import { NUMBER_OF_DAYS_TO_SHOW, getTodayString, formatDatePretty, calculateStreak, getPeriodRange } from './tracker.js';
+import { setupWordEditor, updateWordCount } from './editor.js';
 
 // DOM Selectors Cache
 export const elements = {
@@ -20,6 +21,8 @@ export const elements = {
     // Note Modal
     noteModal: document.getElementById('noteModal'),
     noteModalContent: document.getElementById('noteModalContent'),
+    noteEditorToolbar: document.getElementById('noteEditorToolbar'),
+    noteWordCounter: document.getElementById('noteWordCounter'),
     dailyNote: document.getElementById('dailyNote'),
     cancelNoteBtn: document.getElementById('cancelNoteBtn'),
     confirmNoteBtn: document.getElementById('confirmNoteBtn'),
@@ -33,8 +36,19 @@ export const elements = {
 };
 
 let editingDate = null;
+let isEditorInitialized = false;
 
 // ==================== Note Modal ====================
+
+/**
+ * Initializes the editor toolbar for Note Modal
+ */
+export function initNoteEditor() {
+    if (!isEditorInitialized && elements.dailyNote && elements.noteEditorToolbar) {
+        setupWordEditor(elements.dailyNote, elements.noteEditorToolbar, elements.noteWordCounter);
+        isEditorInitialized = true;
+    }
+}
 
 /**
  * Opens the note modal
@@ -42,6 +56,7 @@ let editingDate = null;
  * @param {Record<string, string>} studyNotes 
  */
 export function openNoteModal(dateToEdit = null, studyNotes = {}) {
+    initNoteEditor();
     editingDate = dateToEdit;
     elements.noteModal.classList.remove('hidden');
     
@@ -55,6 +70,7 @@ export function openNoteModal(dateToEdit = null, studyNotes = {}) {
     } else {
         elements.dailyNote.value = '';
     }
+    updateWordCount(elements.dailyNote, elements.noteWordCounter);
     elements.dailyNote.focus();
 }
 
@@ -150,13 +166,15 @@ export function updateAuthStatus(htmlContent) {
  * @param {Record<string, string>} options.studyNotes
  * @param {Function} options.onBoxClickToday
  * @param {Function} options.onBoxClickCompleted
+ * @param {Function} options.onBoxClickReview
  */
 export function renderGrid({
     currentPeriodOffset = 0,
     studyDates = [],
     studyNotes = {},
     onBoxClickToday = () => {},
-    onBoxClickCompleted = () => {}
+    onBoxClickCompleted = () => {},
+    onBoxClickReview = () => {}
 }) {
     elements.trackerGrid.innerHTML = '';
     const todayStr = getTodayString();
@@ -181,16 +199,32 @@ export function renderGrid({
         box.innerText = day; 
         
         let tooltipText = formatDatePretty(dateStr);
+        const hasNote = Boolean(studyNotes[dateStr] && studyNotes[dateStr].trim());
 
         if (studyDates.includes(dateStr)) {
             box.classList.add('completed');
+            
+            if (hasNote) {
+                box.classList.add('has-note');
+                const dot = document.createElement('span');
+                dot.className = 'note-dot';
+                box.appendChild(dot);
+            }
+
             tooltipText += ' - Đã học: ';
-            if (studyNotes[dateStr]) {
+            if (hasNote) {
                 tooltipText += `\n${studyNotes[dateStr]}`;
             }
-            // Allow editing notes for completed days in the current period
-            if (currentPeriodOffset === 0) {
-                box.style.cursor = 'pointer';
+            if (dateStr < todayStr) {
+                tooltipText += `\n(Nhấn để mở trang ôn tập bài học 📖)`;
+            }
+
+            box.style.cursor = 'pointer';
+            if (dateStr < todayStr) {
+                // All completed past days open lesson review page (read-only)
+                box.addEventListener('click', () => onBoxClickReview(dateStr));
+            } else if (dateStr === todayStr && currentPeriodOffset === 0) {
+                // Only current date can open note editor modal
                 box.addEventListener('click', () => onBoxClickCompleted(dateStr));
             }
         } else if (dateStr === todayStr) {
@@ -221,6 +255,7 @@ export function renderGrid({
  * @param {number} state.currentPeriodOffset
  * @param {Function} state.onBoxClickToday
  * @param {Function} state.onBoxClickCompleted
+ * @param {Function} state.onBoxClickReview
  */
 export function updateUI(state) {
     const {
@@ -229,7 +264,8 @@ export function updateUI(state) {
         savedUserName = "bạn",
         currentPeriodOffset = 0,
         onBoxClickToday,
-        onBoxClickCompleted
+        onBoxClickCompleted,
+        onBoxClickReview
     } = state;
 
     const today = getTodayString();
@@ -258,6 +294,7 @@ export function updateUI(state) {
         studyDates,
         studyNotes,
         onBoxClickToday,
-        onBoxClickCompleted
+        onBoxClickCompleted,
+        onBoxClickReview
     });
 }

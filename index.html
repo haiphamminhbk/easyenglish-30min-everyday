@@ -110,11 +110,19 @@
 
     <!-- Note Modal -->
     <div id="noteModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center transition-opacity opacity-0">
-        <div class="bg-white rounded-2xl p-6 w-[90%] max-w-md shadow-2xl transform scale-95 transition-transform duration-300" id="noteModalContent">
-            <h3 class="text-xl font-bold text-gray-800 mb-2">🎉 Hoàn thành xuất sắc!</h3>
-            <p class="text-sm text-gray-600 mb-4">Bạn đã học gì hôm nay? Hãy ghi chú lại nhé (Tối đa ~500 từ).</p>
-            <textarea id="dailyNote" rows="4" class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none" placeholder="Ví dụ: Đã học 10 từ vựng chủ đề gia đình, luyện nghe podcast 15 phút..."></textarea>
-            <div class="mt-5 flex justify-end gap-3">
+        <div class="bg-white rounded-2xl p-6 w-[92%] max-w-lg shadow-2xl transform scale-95 transition-transform duration-300" id="noteModalContent">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xl font-bold text-gray-800">🎉 Ghi chú bài học</h3>
+                <span id="noteWordCounter" class="text-xs font-medium text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">0 từ • 0 ký tự</span>
+            </div>
+            <p class="text-xs text-gray-500 mb-3">Bạn đã học gì hôm nay? Dùng thanh công cụ để định dạng và ghi chú từ vựng.</p>
+            
+            <!-- Word Editor Toolbar -->
+            <div id="noteEditorToolbar"></div>
+
+            <textarea id="dailyNote" rows="9" class="w-full min-h-[220px] max-h-[50vh] border border-gray-300 rounded-xl p-3.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-y leading-relaxed" placeholder="Ví dụ: Đã học 10 từ vựng chủ đề gia đình, luyện nghe podcast 15 phút..."></textarea>
+            
+            <div class="mt-4 flex justify-end gap-3">
                 <button id="cancelNoteBtn" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Hủy</button>
                 <button id="confirmNoteBtn" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-md">Xác nhận & Lưu</button>
             </div>

@@ -27,6 +27,14 @@ let savedUserName = "bạn";
 let currentPeriodOffset = 0;
 
 /**
+ * Opens lesson review page for a specific date
+ * @param {string} date 
+ */
+function handleOpenReview(date) {
+    window.location.href = `review.html?date=${date}`;
+}
+
+/**
  * Refreshes UI with latest application state
  */
 function refreshUI() {
@@ -36,7 +44,8 @@ function refreshUI() {
         savedUserName,
         currentPeriodOffset,
         onBoxClickToday: handleCheckIn,
-        onBoxClickCompleted: (date) => openNoteModal(date, studyNotes)
+        onBoxClickCompleted: (date) => openNoteModal(date, studyNotes),
+        onBoxClickReview: handleOpenReview
     });
 }
 
@@ -70,7 +79,8 @@ async function handleConfirmNote() {
             studyDates,
             studyNotes,
             onBoxClickToday: handleCheckIn,
-            onBoxClickCompleted: (date) => openNoteModal(date, studyNotes)
+            onBoxClickCompleted: (date) => openNoteModal(date, studyNotes),
+            onBoxClickReview: handleOpenReview
         });
         await saveStudyData(studyDates, studyNotes);
     } else {
@@ -138,7 +148,8 @@ function setupEventListeners() {
             studyDates,
             studyNotes,
             onBoxClickToday: handleCheckIn,
-            onBoxClickCompleted: (date) => openNoteModal(date, studyNotes)
+            onBoxClickCompleted: (date) => openNoteModal(date, studyNotes),
+            onBoxClickReview: handleOpenReview
         });
     });
 
@@ -149,7 +160,8 @@ function setupEventListeners() {
             studyDates,
             studyNotes,
             onBoxClickToday: handleCheckIn,
-            onBoxClickCompleted: (date) => openNoteModal(date, studyNotes)
+            onBoxClickCompleted: (date) => openNoteModal(date, studyNotes),
+            onBoxClickReview: handleOpenReview
         });
     });
 }

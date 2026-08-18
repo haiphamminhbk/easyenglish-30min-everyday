@@ -69,6 +69,21 @@ body {
     box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.39);
 }
 
+.day-box.has-note {
+    position: relative;
+}
+
+.day-box.has-note .note-dot {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 6px;
+    height: 6px;
+    background-color: #FBBF24;
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(251, 191, 36, 0.8);
+}
+
 .day-box.today:not(.completed) {
     border: 2px dashed var(--primary);
     color: var(--primary);
@@ -214,3 +229,26 @@ blockquote p:last-child {
     color: var(--primary);
     font-style: normal;
 }
+
+/* Word Editor Toolbar Styles */
+.editor-btn {
+    user-select: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease-in-out;
+}
+
+.editor-btn:active {
+    transform: scale(0.92);
+}
+
+mark {
+    background-color: #fef08a;
+    color: #713f12;
+    padding: 0.1rem 0.35rem;
+    border-radius: 0.25rem;
+    font-weight: 600;
+}
+
