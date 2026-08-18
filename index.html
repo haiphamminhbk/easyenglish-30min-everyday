@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English 30-Min Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Poppins:wght@700;800&display=swap');
+
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --success: #10B981;
+            --text-dark: #1F2937;
+            --text-light: #6B7280;
+            --box-empty: #E5E7EB;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; /* Ngăn cuộn ngang */
+            overflow-y: auto; /* MỞ CUỘN DỌC để xem hết 30 ngày trên màn hình nhỏ */
+            color: var(--text-dark);
+            background-color: #0f172a; /* Fallback background */
+        }
+
+        /* 3D Canvas Background */
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1; /* Đặt sau tất cả nội dung */
+        }
+
+        /* Tùy chỉnh hiệu ứng cho thẻ chứa chính */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+
+        .day-box {
+            aspect-ratio: 1;
+            background-color: var(--box-empty);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #9CA3AF;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .day-box:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .day-box.completed {
+            background-color: var(--success);
+            color: white;
+            box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.39);
+        }
+
+        .day-box.today:not(.completed) {
+            border: 2px dashed var(--primary);
+            color: var(--primary);
+            background-color: #EEF2FF;
+        }
+
+        /* Tooltip */
+        .day-box[title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            background: #1F2937;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 400;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-8px);
+            white-space: pre-wrap; /* Cho phép xuống dòng */
+            width: max-content;
+            max-width: 250px;
+            z-index: 50;
+            opacity: 0;
+            animation: fadeIn 0.2s forwards;
+            pointer-events: none;
+            line-height: 1.4;
+            text-align: center;
+        }
+        
+        .day-box[title]:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: #1F2937 transparent transparent transparent;
+            z-index: 50;
+            opacity: 0;
+            animation: fadeIn 0.2s forwards;
+            pointer-events: none;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        @keyframes pulseCheck {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse-btn {
+            animation: pulseCheck 2s infinite;
+        }
+
+        /* Thêm style cho phần trích dẫn */
+        blockquote {
+            position: relative;
+            background: #f8fafc;
+            border-left: 4px solid var(--primary);
+            margin: 1.5rem 0;
+            padding: 1rem 1.2rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            color: #4b5563;
+            font-style: italic;
+        }
+        blockquote p {
+            margin-bottom: 0.5rem;
+        }
+        blockquote p:last-child {
+            margin-bottom: 0;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--primary);
+            font-style: normal;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 sm:p-8">
+
+    <!-- Nền 3D Canvas -->
+    <canvas id="bgCanvas"></canvas>
+
+    <!-- Khung nội dung chính -->
+    <main class="glass-panel w-full max-w-lg p-8 rounded-3xl relative z-10 mx-auto">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2" style="font-family: 'Poppins', sans-serif; color: #00245A;">EASY ENGLISH</h1>
+            <h2 class="text-lg font-semibold text-indigo-600 mt-1 mb-3">Mỗi ngày 30 phút – Tiến bộ từng bước một</h2>
+            
+            <p class="text-gray-600 mt-2 text-sm leading-relaxed">
+                Dành <strong>30 phút</strong> mỗi ngày để nâng cao trình độ tiếng Anh. Hôm nay bạn đã hoàn thành mục tiêu chưa?
+            </p>
+
+            <!-- Khối trích dẫn (Quotation) -->
+            <blockquote class="text-left text-sm shadow-sm">
+                <p>“A journey of a thousand miles begins with a single step.”</p>
+                <p>Hành trình ngàn dặm bắt đầu bằng một bước đi.</p>
+            </blockquote>
+
+            <p class="text-gray-500 mt-3 text-xs leading-relaxed italic px-2">
+                Đừng chờ đến khi có nhiều thời gian mới bắt đầu học. 30 phút mỗi ngày có thể không tạo ra sự thay đổi ngay lập tức, nhưng sự kiên trì mỗi ngày sẽ tạo nên khác biệt lớn theo thời gian.
+            </p>
+            
+            <div id="authStatus" class="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm transition-all duration-300">
+                <span class="animate-pulse w-2 h-2 rounded-full bg-yellow-400"></span> Đang kết nối máy chủ...
+            </div>
+        </header>
+
+        <div class="flex justify-between gap-4 mb-8">
+            <div class="flex-1 bg-white rounded-2xl p-4 text-center border border-gray-100 shadow-sm">
+                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Chuỗi ngày</p>
+                <div class="text-3xl font-bold text-orange-500 flex items-center justify-center gap-1">
+                    <span id="streakCount">0</span>
+                    <span class="text-2xl">🔥</span>
+                </div>
+            </div>
+            <div class="flex-1 bg-white rounded-2xl p-4 text-center border border-gray-100 shadow-sm">
+                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Tổng số ngày</p>
+                <div class="text-3xl font-bold text-indigo-600 flex items-center justify-center gap-1">
+                    <span id="totalDays">0</span>
+                    <span class="text-2xl">🌟</span>
+                </div>
+            </div>
+        </div>
+
+        <button id="checkInBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform shadow-lg hover:shadow-indigo-500/30 active:scale-95 text-lg mb-8 pulse-btn disabled:opacity-75 disabled:cursor-not-allowed">
+            Hoàn thành 30 phút! 🚀
+        </button>
+
+        <section>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Tiến độ 30 ngày qua</h3>
+                <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-md">Lịch sử</span>
+            </div>
+            
+            <!-- Sắp xếp lại lưới: 6 cột trên mobile (6x5=30), 10 cột trên máy tính (10x3=30) -->
+            <div class="grid grid-cols-6 sm:grid-cols-10 gap-2" id="trackerGrid">
+                <!-- Javascript sẽ tạo các ô grid vào đây -->
+            </div>
+        </section>
+        
+        <footer class="mt-8 text-center text-xs text-gray-400 flex flex-col items-center gap-1">
+            <span>Dữ liệu của bạn được đồng bộ an toàn trên đám mây ☁️</span>
+        </footer>
+    </main>
+
+    <!-- Modal Pop-up Ghi chú -->
+    <div id="noteModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center transition-opacity opacity-0">
+        <div class="bg-white rounded-2xl p-6 w-[90%] max-w-md shadow-2xl transform scale-95 transition-transform duration-300" id="noteModalContent">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">🎉 Hoàn thành xuất sắc!</h3>
+            <p class="text-sm text-gray-600 mb-4">Bạn đã học gì hôm nay? Hãy ghi chú lại nhé (Tối đa ~300 từ).</p>
+            <textarea id="dailyNote" rows="4" class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none" placeholder="Ví dụ: Đã học 10 từ vựng chủ đề gia đình, luyện nghe podcast 15 phút..."></textarea>
+            <div class="mt-5 flex justify-end gap-3">
+                <button id="cancelNoteBtn" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Hủy</button>
+                <button id="confirmNoteBtn" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-md">Xác nhận & Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'english-tracker-v1';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        
+        let app, auth, db, currentUser = null;
+        let studyDates = []; 
+        let studyNotes = {}; 
+        
+        const checkInBtn = document.getElementById('checkInBtn');
+        const streakDisplay = document.getElementById('streakCount');
+        const totalDisplay = document.getElementById('totalDays');
+        const gridContainer = document.getElementById('trackerGrid');
+        const authStatus = document.getElementById('authStatus');
+        const NUMBER_OF_DAYS_TO_SHOW = 30;
+
+        // Khởi tạo hệ thống nếu có cấu hình máy chủ
+        if (firebaseConfig) {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            initAuth();
+        } else {
+            // Chạy chế độ offline nếu không có cấu hình máy chủ
+            studyDates = JSON.parse(localStorage.getItem('english_30min_v2')) || [];
+            studyNotes = JSON.parse(localStorage.getItem('english_30min_notes_v2')) || {};
+            authStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-gray-400"></span> Lưu trữ trên trình duyệt`;
+            updateUI();
+        }
+
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined') {
+                    // Ưu tiên đăng nhập bằng tài khoản (thường là Gmail) bạn đang dùng
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Lỗi đăng nhập:", error);
+                authStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> Lỗi kết nối`;
+            }
+        }
+
+        if (auth) {
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    currentUser = user;
+                    authStatus.innerHTML = user.isAnonymous 
+                        ? `<span class="w-2 h-2 rounded-full bg-yellow-500"></span> Đang dùng Ẩn danh (Không lưu chéo thiết bị)` 
+                        : `<span class="w-2 h-2 rounded-full bg-green-500"></span> Đã đồng bộ tài khoản ☁️`;
+                    setupFirestoreListener();
+                } else {
+                    currentUser = null;
+                }
+            });
+        }
+
+        function setupFirestoreListener() {
+            if (!currentUser || !db) return;
+            const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'trackingData', 'history');
+            
+            // Lắng nghe thay đổi dữ liệu realtime từ đám mây
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    studyDates = data.dates || [];
+                    studyNotes = data.notes || {};
+                } else {
+                    studyDates = [];
+                    studyNotes = {};
+                }
+                updateUI();
+            }, (error) => {
+                console.error("Lỗi tải dữ liệu:", error);
+                authStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> Lỗi tải dữ liệu`;
+            });
+        }
+
+        let scene, camera, renderer, particles;
+
+        function init3DBackground() {
+            const canvas = document.getElementById('bgCanvas');
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x0f172a, 0.001);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 2000);
+            camera.position.z = 1000;
+
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            const geometry = new THREE.BufferGeometry();
+            const particleCount = 1500;
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+            const color = new THREE.Color();
+
+            for (let i = 0; i < particleCount; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 3000;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * 3000;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 3000;
+
+                color.setHSL(0.6 + Math.random() * 0.2, 0.8, 0.5 + Math.random() * 0.3);
+                colors[i * 3] = color.r;
+                colors[i * 3 + 1] = color.g;
+                colors[i * 3 + 2] = color.b;
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const material = new THREE.PointsMaterial({
+                size: 6,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8,
+                sizeAttenuation: true
+            });
+
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            window.addEventListener('resize', onWindowResize, false);
+            document.addEventListener('mousemove', onDocumentMouseMove, false);
+        }
+
+        let mouseX = 0;
+        let mouseY = 0;
+        let windowHalfX = window.innerWidth / 2;
+        let windowHalfY = window.innerHeight / 2;
+
+        function onDocumentMouseMove(event) {
+            mouseX = (event.clientX - windowHalfX) * 0.5;
+            mouseY = (event.clientY - windowHalfY) * 0.5;
+        }
+
+        function onWindowResize() {
+            windowHalfX = window.innerWidth / 2;
+            windowHalfY = window.innerHeight / 2;
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            particles.rotation.x += 0.0002;
+            particles.rotation.y += 0.0005;
+            camera.position.x += (mouseX - camera.position.x) * 0.05;
+            camera.position.y += (-mouseY - camera.position.y) * 0.05;
+            camera.lookAt(scene.position);
+            renderer.render(scene, camera);
+        }
+
+        function getTodayString() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatDatePretty(dateString) {
+            const [year, month, day] = dateString.split('-');
+            return `${day}/${month}/${year}`;
+        }
+
+        // Logic Modal
+        const noteModal = document.getElementById('noteModal');
+        const noteModalContent = document.getElementById('noteModalContent');
+        const dailyNoteInput = document.getElementById('dailyNote');
+
+        function openModal() {
+            noteModal.classList.remove('hidden');
+            // Kích hoạt re-flow để animation chạy mượt
+            void noteModal.offsetWidth;
+            noteModal.classList.remove('opacity-0');
+            noteModalContent.classList.remove('scale-95');
+            dailyNoteInput.value = '';
+            dailyNoteInput.focus();
+        }
+
+        function closeModal() {
+            noteModal.classList.add('opacity-0');
+            noteModalContent.classList.add('scale-95');
+            setTimeout(() => {
+                noteModal.classList.add('hidden');
+            }, 300);
+        }
+
+        document.getElementById('cancelNoteBtn').addEventListener('click', closeModal);
+
+        async function handleCheckIn() {
+            const today = getTodayString();
+            if (!studyDates.includes(today)) {
+                openModal();
+            }
+        }
+
+        async function confirmCheckIn() {
+            const today = getTodayString();
+            const noteText = dailyNoteInput.value.trim();
+            
+            if (!studyDates.includes(today)) {
+                studyDates.push(today);
+                studyDates.sort();
+                
+                if (noteText) {
+                    studyNotes[today] = noteText;
+                }
+                
+                checkInBtn.innerText = "Tuyệt vời! Đã hoàn thành 🎉";
+                checkInBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700', 'pulse-btn');
+                checkInBtn.classList.add('bg-green-500', 'hover:bg-green-600', 'scale-105');
+                
+                setTimeout(() => {
+                    checkInBtn.classList.remove('scale-105');
+                }, 200);
+
+                closeModal();
+                updateUI();
+
+                // Lưu dữ liệu lên đám mây Firebase
+                if (currentUser && db) {
+                    try {
+                        const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'trackingData', 'history');
+                        await setDoc(docRef, { dates: studyDates, notes: studyNotes }, { merge: true });
+                    } catch (error) {
+                        console.error("Lỗi khi đồng bộ:", error);
+                    }
+                } else {
+                    localStorage.setItem('english_30min_v2', JSON.stringify(studyDates));
+                    localStorage.setItem('english_30min_notes_v2', JSON.stringify(studyNotes));
+                }
+            }
+        }
+
+        document.getElementById('confirmNoteBtn').addEventListener('click', confirmCheckIn);
+
+        function calculateStreak() {
+            if (studyDates.length === 0) return 0;
+            
+            let streak = 0;
+            const checkDate = new Date();
+            checkDate.setHours(0,0,0,0);
+            
+            const todayStr = getTodayString();
+
+            if (studyDates.includes(todayStr)) {
+                streak = 1;
+                checkDate.setDate(checkDate.getDate() - 1);
+            } else {
+                checkDate.setDate(checkDate.getDate() - 1);
+            }
+
+            while(true) {
+                const year = checkDate.getFullYear();
+                const month = String(checkDate.getMonth() + 1).padStart(2, '0');
+                const day = String(checkDate.getDate()).padStart(2, '0');
+                const dateStr = `${year}-${month}-${day}`;
+
+                if (studyDates.includes(dateStr)) {
+                    streak++;
+                    checkDate.setDate(checkDate.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+            return streak;
+        }
+
+        function renderGrid() {
+            gridContainer.innerHTML = '';
+            const todayStr = getTodayString();
+            
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - (NUMBER_OF_DAYS_TO_SHOW - 1));
+
+            for (let i = 0; i < NUMBER_OF_DAYS_TO_SHOW; i++) {
+                const d = new Date(startDate);
+                d.setDate(d.getDate() + i);
+                
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                const dateStr = `${year}-${month}-${day}`;
+
+                const box = document.createElement('div');
+                box.className = 'day-box';
+                box.innerText = day; 
+                
+                let tooltipText = formatDatePretty(dateStr);
+
+                if (studyDates.includes(dateStr)) {
+                    box.classList.add('completed');
+                    tooltipText += ' - Đã học';
+                    if (studyNotes[dateStr]) {
+                        tooltipText += `\n📝: ${studyNotes[dateStr]}`;
+                    }
+                } else if (dateStr === todayStr) {
+                    box.classList.add('today');
+                    tooltipText = "Hôm nay - Cố lên nhé!";
+                } else {
+                    tooltipText += ' - Chưa học';
+                }
+
+                box.title = tooltipText;
+
+                if (dateStr === todayStr && !studyDates.includes(dateStr)) {
+                    box.addEventListener('click', handleCheckIn);
+                }
+
+                gridContainer.appendChild(box);
+            }
+        }
+
+        function updateUI() {
+            const today = getTodayString();
+
+            if (studyDates.includes(today)) {
+                checkInBtn.disabled = true;
+                checkInBtn.innerText = "Đã hoàn thành mục tiêu hôm nay ✔️";
+                checkInBtn.classList.remove('pulse-btn', 'bg-indigo-600', 'hover:bg-indigo-700');
+                checkInBtn.classList.add('bg-green-500', 'cursor-not-allowed', 'opacity-90');
+            } else {
+                checkInBtn.disabled = false;
+                checkInBtn.innerText = "Hoàn thành 30 phút! 🚀";
+                checkInBtn.classList.add('pulse-btn');
+                checkInBtn.classList.remove('bg-green-500', 'cursor-not-allowed', 'opacity-90');
+                checkInBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+            }
+
+            totalDisplay.innerText = studyDates.length;
+            streakDisplay.innerText = calculateStreak();
+            renderGrid();
+        }
+
+        checkInBtn.addEventListener('click', handleCheckIn);
+
+        window.onload = function() {
+            init3DBackground();
+            animate3D();
+            // Hàm UpdateUI() sẽ được tự động gọi khi dữ liệu từ máy chủ tải xong (onSnapshot)
+        };
+    </script>
+</body>
+</html>
