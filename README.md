@@ -1,47 +1,65 @@
-# ⏰ Easy English Reminder (30-Minute Daily Tracker)
+# ⏰ Easy English Reminder (Next.js & React App)
 
-A responsive web application to track daily 30-minute English learning habits with streak counters, daily learning notes, 3D interactive particle background, and Firebase / LocalStorage synchronization.
+A modern habit-tracking web application built with **Next.js 14 (App Router)**, **React.js**, **Tailwind CSS**, and **Three.js** to track daily 30-minute English learning, with interactive streak counters, rich Word Editor toolbar, and audio lesson reviews.
 
 ---
 
-## 📁 Project Structure
+## 📁 Project Architecture
 
 ```
 english_tracker_30_min/
-├── index.html              # Main HTML markup skeleton
-├── review.html             # Dedicated lesson review page with TTS & notes
-├── css/
-│   └── style.css           # Glassmorphism, animations, tooltips, responsive grid layout
-├── js/
-│   ├── app.js              # Application entry point & event orchestration
-│   ├── editor.js           # Word-style formatting toolbar, templates & markdown parser
-│   ├── review.js           # Lesson review controller (audio TTS, note editing & navigation)
-│   ├── tracker.js          # Streak calculation, date helpers & period generation
-│   ├── storage.js          # Firebase Firestore sync & LocalStorage fallback
-│   ├── background3d.js     # Three.js 3D interactive particle background
-│   ├── effects.js          # Confetti particles & celebration banner animations
-│   └── ui.js               # Modal controllers (notes & username) and grid renderer
-└── README.md               # Project documentation
+├── app/
+│   ├── layout.jsx            # Next.js Root Layout with 3D Background & Fonts
+│   ├── page.jsx              # Main Dashboard (Streak, 30-Day Grid, Check-in, Modals)
+│   ├── review/
+│   │   └── page.jsx          # Lesson Review Page with Audio TTS & Read-Only Guard
+│   └── globals.css           # Tailwind directives & glassmorphism animations
+├── components/
+│   ├── Background3D.jsx      # Interactive Three.js 3D Particle Constellation
+│   ├── ConfettiEffect.jsx    # Celebration Falling Confetti & Banner
+│   ├── FormattedNote.jsx     # Rich text renderer for notes, vocab, and grammar formulas
+│   ├── WordEditor.jsx        # Formatting toolbar (Bold, Italic, Vocab, Grammar, Cấu trúc)
+│   ├── NoteModal.jsx         # Check-in & Note Editor Modal
+│   └── NameModal.jsx         # User Greeting Customization Modal
+├── lib/
+│   ├── storage.js            # Unified data layer (LocalStorage + Firebase Client Sync)
+│   └── tracker.js            # Pure streak calculation, date helpers & 30-day windows
+├── package.json              # Next.js, React, Three, Tailwind dependencies
+├── tailwind.config.js        # Tailwind CSS theme configuration
+├── postcss.config.js         # PostCSS configuration
+├── next.config.js            # Next.js configuration
+└── jsconfig.json             # Root @/* path aliases
 ```
 
 ---
 
-## 🧩 Module Breakdown
+## ✨ Features
 
-- **[`index.html`](file:///d:/CODING/english_tracker_30_min/index.html)**: Clean, semantic HTML structure using Tailwind CSS and Three.js CDN.
-- **[`review.html`](file:///d:/CODING/english_tracker_30_min/review.html)**: Dedicated lesson review page with rich note viewer and Text-To-Speech audio player.
-- **[`css/style.css`](file:///d:/CODING/english_tracker_30_min/css/style.css)**: Custom styles including glassmorphism UI cards, editor toolbar buttons, tooltip popups, and animations.
-- **[`js/editor.js`](file:///d:/CODING/english_tracker_30_min/js/editor.js)**: Word-style formatting toolbar (Bold, Italic, Underline, Highlight, Bullet/Number lists, Vocab & Grammar templates, live word/character counter, and rich text parser).
-- **[`js/app.js`](file:///d:/CODING/english_tracker_30_min/js/app.js)**: Initializes components upon page load, manages state reactivity, and binds event handlers.
-- **[`js/review.js`](file:///d:/CODING/english_tracker_30_min/js/review.js)**: Controls the review page with Text-To-Speech (TTS) voice pronunciation, in-place note editing, clipboard copy, and lesson-to-lesson navigation.
-- **[`js/tracker.js`](file:///d:/CODING/english_tracker_30_min/js/tracker.js)**: Pure calculation algorithms for streaks (`calculateStreak`), date formatting (`getTodayString`, `formatDatePretty`), and pagination periods (`getPeriodRange`).
-- **[`js/storage.js`](file:///d:/CODING/english_tracker_30_min/js/storage.js)**: Handles data persistence with Firebase Auth & Cloud Firestore real-time snapshots with offline fallback to browser `localStorage`.
-- **[`js/background3d.js`](file:///d:/CODING/english_tracker_30_min/js/background3d.js)**: Three.js 3D particle constellation responding to mouse movements and viewport resize.
-- **[`js/effects.js`](file:///d:/CODING/english_tracker_30_min/js/effects.js)**: Celebration banner with 80 falling confetti elements triggered on daily goal completion.
-- **[`js/ui.js`](file:///d:/CODING/english_tracker_30_min/js/ui.js)**: Renders the 30-day interactive history grid and manages the Note & Name modals.
+- ⚡ **Next.js 14 App Router & React**: Clean component architecture and client-side routing (`/` and `/review?date=YYYY-MM-DD`).
+- 🔥 **Streak & Habit Tracking**: Automatic daily streak calculation, total days counter, and 30-day period history navigation.
+- 🛠️ **Word-Style Note Editor**:
+  - **Styles**: Bold, Italic, Underline, Highlight.
+  - **Lists**: Bullet lists (`- `) and Numbered lists (`1. `).
+  - **Quick Study Templates**: 📖 Từ vựng, 💡 Cấu trúc câu, 📘 Ngữ pháp, ⚡ Công thức thì (`(+)`, `(-)`, `(?)`), ⚠️ Lưu ý.
+  - **Live Word Counter**: Real-time word and character count badge.
+- 🔒 **Read-Only Past Lesson Review**:
+  - Days before today can only be opened for review.
+  - Text-To-Speech (TTS) English pronunciation audio player.
+  - One-click copy note to clipboard.
+  - Prev / Next lesson navigation across saved notes.
+- 🎨 **Rich Aesthetics**: Glassmorphism cards, interactive 3D particle background (Three.js), and animated celebration confetti.
 
 ---
 
-## 🚀 How to Run
+## 🚀 How to Run the Next.js App
 
-Open `index.html` in any modern web browser or run with a local web server (e.g. Live Server in VS Code / Antigravity IDE, `npx serve`, or `python -m http.server`).
+1. Install [Node.js (LTS)](https://nodejs.org/) if you haven't already.
+2. Open terminal in the project directory:
+   ```bash
+   npm install
+   ```
+3. Start the Next.js local development server:
+   ```bash
+   npm run dev
+   ```
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
