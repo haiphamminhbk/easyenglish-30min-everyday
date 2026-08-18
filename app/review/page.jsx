@@ -8,7 +8,6 @@ import { initStorage, saveStudyData, loadLocalData } from '@/lib/storage';
 import FormattedNote from '@/components/FormattedNote';
 import RichWordEditor from '@/components/RichWordEditor';
 import ThemeToggle from '@/components/ThemeToggle';
-import { voicePlayer } from '@/lib/audioPlayer';
 
 function ReviewContent() {
   const router = useRouter();
@@ -20,7 +19,6 @@ function ReviewContent() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [editNoteText, setEditNoteText] = useState('');
-  const [isSpeaking, setIsSpeaking] = useState(false);
   const [copied, setCopied] = useState(false);
 
   // Sync date from URL search param ?date=YYYY-MM-DD
@@ -43,10 +41,6 @@ function ReviewContent() {
       if (data.studyDates) setStudyDates(data.studyDates);
       if (data.studyNotes) setStudyNotes(data.studyNotes);
     });
-
-    return () => {
-      voicePlayer.stop();
-    };
   }, []);
 
   const today = getTodayString();
@@ -62,8 +56,6 @@ function ReviewContent() {
   const currentIndex = datesWithNotes.indexOf(currentDate);
 
   const navigateToDate = (targetDate) => {
-    voicePlayer.stop();
-    setIsSpeaking(false);
     setIsEditing(false);
     router.push(`/review?date=${targetDate}`);
   };
@@ -88,21 +80,6 @@ function ReviewContent() {
         navigateToDate(nextDates[0]);
       }
     }
-  };
-
-  // Google Translation Voice Player with Natural Multi-Language Detection
-  const handleTTS = () => {
-    if (isSpeaking) {
-      voicePlayer.stop();
-      setIsSpeaking(false);
-      return;
-    }
-
-    if (!rawNote) return;
-
-    voicePlayer.play(rawNote, (playing) => {
-      setIsSpeaking(playing);
-    });
   };
 
   // Copy to clipboard
@@ -200,28 +177,6 @@ function ReviewContent() {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={handleTTS}
-              disabled={!rawNote}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 font-medium text-xs rounded-lg transition-colors shadow-sm ${
-                isSpeaking
-                  ? 'bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 hover:bg-red-100'
-                  : 'bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300'
-              } disabled:opacity-40 disabled:cursor-not-allowed`}
-              title="Nghe đọc bài học tự nhiên với giọng Google Translate"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
-                />
-              </svg>
-              <span>{isSpeaking ? 'Dừng đọc ⏹️' : 'Đọc bài (Google Voice) 🔊'}</span>
-            </button>
-
-            <button
-              type="button"
               onClick={handleCopy}
               disabled={!rawNote}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 font-medium text-xs rounded-lg transition-colors ${
@@ -239,7 +194,7 @@ function ReviewContent() {
                   d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
                 />
               </svg>
-              <span>{copied ? 'Đã sao chép! ✔️' : 'Sao chép'}</span>
+              <span>{copied ? 'Đã sao chép! ✔️' : 'Sao chép ghi chú'}</span>
             </button>
           </div>
 

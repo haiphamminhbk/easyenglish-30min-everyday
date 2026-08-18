@@ -6,7 +6,6 @@ import { init3DBackground } from './background3d.js';
 import { initStorage, saveStudyData, loadLocalData } from './storage.js';
 import { formatDatePretty, getTodayString } from './tracker.js';
 import { setupWordEditor, updateWordCount, renderFormattedText } from './editor.js';
-import { voicePlayer } from './audioPlayer.js';
 
 // DOM Elements
 const lessonDateDisplay = document.getElementById('lessonDateDisplay');
@@ -17,9 +16,6 @@ const noteEditContainer = document.getElementById('noteEditContainer');
 const reviewEditorToolbar = document.getElementById('reviewEditorToolbar');
 const reviewWordCounter = document.getElementById('reviewWordCounter');
 const editNoteTextarea = document.getElementById('editNoteTextarea');
-const ttsBtn = document.getElementById('ttsBtn');
-const ttsBtnText = document.getElementById('ttsBtnText');
-const ttsIcon = document.getElementById('ttsIcon');
 const copyBtn = document.getElementById('copyBtn');
 const copyBtnText = document.getElementById('copyBtnText');
 const toggleEditBtn = document.getElementById('toggleEditBtn');
@@ -119,47 +115,6 @@ function renderLesson(date) {
         prevLessonBtn.disabled = currentIndex <= 0;
         nextLessonBtn.disabled = currentIndex >= datesWithNotes.length - 1;
     }
-
-    // Reset TTS state if date changed
-    if (isSpeaking) {
-        voicePlayer.stop();
-        setTtsButtonState(false);
-    }
-}
-
-/**
- * Updates TTS button appearance
- * @param {boolean} speaking 
- */
-function setTtsButtonState(speaking) {
-    isSpeaking = speaking;
-    if (speaking) {
-        ttsBtn.classList.remove('bg-indigo-50', 'text-indigo-700');
-        ttsBtn.classList.add('bg-red-50', 'text-red-600');
-        ttsBtnText.textContent = 'Dừng đọc ⏹️';
-    } else {
-        ttsBtn.classList.remove('bg-red-50', 'text-red-600');
-        ttsBtn.classList.add('bg-indigo-50', 'text-indigo-700');
-        ttsBtnText.textContent = 'Đọc bài (Google Voice) 🔊';
-    }
-}
-
-/**
- * Handles Google Translation voice playback with language detection
- */
-function handleTTS() {
-    if (isSpeaking) {
-        voicePlayer.stop();
-        setTtsButtonState(false);
-        return;
-    }
-
-    const rawNote = studyNotes[currentDate];
-    if (!rawNote || !rawNote.trim()) return;
-
-    voicePlayer.play(rawNote, (playing) => {
-        setTtsButtonState(playing);
-    });
 }
 
 /**
@@ -286,7 +241,6 @@ function navigateToDate(date) {
  * Binds event listeners
  */
 function setupEventListeners() {
-    ttsBtn.addEventListener('click', handleTTS);
     copyBtn.addEventListener('click', handleCopy);
     toggleEditBtn.addEventListener('click', handleToggleEdit);
     cancelEditBtn.addEventListener('click', handleCancelEdit);
