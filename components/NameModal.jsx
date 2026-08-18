@@ -19,23 +19,23 @@ export default function NameModal({ isOpen, currentName, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-        <h3 className="text-xl font-bold text-gray-800 mb-2">👋 Xin chào!</h3>
-        <p className="text-sm text-gray-600 mb-4">Bạn tên là gì nhỉ?</p>
+    <div className="fixed inset-0 bg-gray-900/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-slate-900 dark:border dark:border-slate-700/80 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+        <h3 className="text-xl font-bold text-gray-800 dark:text-slate-100 mb-2">👋 Xin chào!</h3>
+        <p className="text-sm text-gray-600 dark:text-slate-400 mb-4">Bạn tên là gì nhỉ?</p>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Nhập tên của bạn..."
-          className="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+          className="w-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-100 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
           autoFocus
         />
         <div className="mt-5 flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
           >
             Hủy
           </button>

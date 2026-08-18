@@ -7,6 +7,7 @@ import { getTodayString, formatDatePretty } from '@/lib/tracker';
 import { initStorage, saveStudyData, loadLocalData } from '@/lib/storage';
 import FormattedNote from '@/components/FormattedNote';
 import RichWordEditor from '@/components/RichWordEditor';
+import ThemeToggle from '@/components/ThemeToggle';
 import { voicePlayer } from '@/lib/audioPlayer';
 
 function ReviewContent() {
@@ -153,12 +154,12 @@ function ReviewContent() {
   };
 
   return (
-    <main className="glass-panel w-full max-w-xl p-6 sm:p-8 rounded-3xl relative z-10 mx-auto">
-      {/* Top Navigation */}
-      <div className="flex items-center justify-between mb-6">
+    <main className="glass-panel w-full max-w-xl p-6 sm:p-8 rounded-3xl relative z-10 mx-auto dark:text-slate-100 transition-colors duration-300">
+      {/* Top Navigation Bar */}
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/80 hover:bg-white text-indigo-600 font-semibold text-sm shadow-sm transition-all duration-200 hover:-translate-x-0.5 border border-indigo-100"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-700 text-indigo-600 dark:text-indigo-400 font-semibold text-sm shadow-sm transition-all duration-200 hover:-translate-x-0.5 border border-indigo-100 dark:border-slate-700"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -166,32 +167,36 @@ function ReviewContent() {
           <span>Quay lại Tracker</span>
         </Link>
 
-        <div
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm border ${
-            isCompleted
-              ? 'bg-green-100 text-green-700 border-green-200'
-              : 'bg-gray-100 text-gray-600 border-gray-200'
-          }`}
-        >
-          <span>{isCompleted ? '🌟 Đã học 30 phút' : '⏳ Chưa đánh dấu học'}</span>
+        <div className="flex items-center gap-2">
+          <div
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm border ${
+              isCompleted
+                ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60'
+                : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 border-gray-200 dark:border-slate-700'
+            }`}
+          >
+            <span>{isCompleted ? '🌟 Đã học 30 phút' : '⏳ Chưa đánh dấu học'}</span>
+          </div>
+
+          <ThemeToggle />
         </div>
       </div>
 
       {/* Lesson Header */}
       <header className="text-center mb-6">
-        <div className="inline-block px-3 py-1 bg-indigo-50 text-indigo-700 font-bold text-xs rounded-full uppercase tracking-wider mb-2">
+        <div className="inline-block px-3 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold text-xs rounded-full uppercase tracking-wider mb-2 border border-indigo-100/60 dark:border-indigo-800/60">
           Bài học ngày
         </div>
-        <h1 className="text-3xl font-extrabold text-gray-800 tracking-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
+        <h1 className="text-3xl font-extrabold text-gray-800 dark:text-slate-100 tracking-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
           {formatDatePretty(currentDate)}
         </h1>
-        <p className="text-gray-500 text-xs mt-1">Xem lại kiến thức và từ vựng bạn đã ghi chú</p>
+        <p className="text-gray-500 dark:text-slate-400 text-xs mt-1">Xem lại kiến thức và từ vựng bạn đã ghi chú</p>
       </header>
 
       {/* Lesson Note Card */}
-      <section className="bg-white rounded-2xl p-6 border border-gray-100 shadow-md mb-6">
+      <section className="bg-white dark:bg-slate-800/90 rounded-2xl p-6 border border-gray-100 dark:border-slate-700/80 shadow-md mb-6 transition-colors duration-300">
         {/* Actions Toolbar */}
-        <div className="flex items-center justify-between pb-4 mb-4 border-b border-gray-100 flex-wrap gap-2">
+        <div className="flex items-center justify-between pb-4 mb-4 border-b border-gray-100 dark:border-slate-700/80 flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -199,8 +204,8 @@ function ReviewContent() {
               disabled={!rawNote}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 font-medium text-xs rounded-lg transition-colors shadow-sm ${
                 isSpeaking
-                  ? 'bg-red-50 text-red-600 hover:bg-red-100'
-                  : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700'
+                  ? 'bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 hover:bg-red-100'
+                  : 'bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300'
               } disabled:opacity-40 disabled:cursor-not-allowed`}
               title="Nghe đọc bài học tự nhiên với giọng Google Translate"
             >
@@ -220,7 +225,9 @@ function ReviewContent() {
               onClick={handleCopy}
               disabled={!rawNote}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 font-medium text-xs rounded-lg transition-colors ${
-                copied ? 'bg-green-100 text-green-700' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                copied
+                  ? 'bg-green-100 dark:bg-emerald-950 text-green-700 dark:text-emerald-300'
+                  : 'bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200'
               } disabled:opacity-40 disabled:cursor-not-allowed`}
               title="Sao chép nội dung ghi chú"
             >
@@ -238,8 +245,8 @@ function ReviewContent() {
 
           {/* Read-Only Badge for Past Dates or Edit Button for Today */}
           {isPastDate ? (
-            <div className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-500 font-medium text-xs rounded-lg border border-gray-200">
-              <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 dark:bg-slate-700/80 text-gray-500 dark:text-slate-400 font-medium text-xs rounded-lg border border-gray-200 dark:border-slate-600">
+              <svg className="w-3.5 h-3.5 text-gray-400 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               <span>Chỉ xem ôn tập</span>
@@ -248,7 +255,7 @@ function ReviewContent() {
             <button
               type="button"
               onClick={handleStartEdit}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-xs rounded-lg transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200 font-medium text-xs rounded-lg transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -271,7 +278,7 @@ function ReviewContent() {
               <button
                 type="button"
                 onClick={() => setIsEditing(false)}
-                className="px-4 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="px-4 py-2 text-xs font-medium text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
               >
                 Hủy
               </button>
@@ -297,7 +304,7 @@ function ReviewContent() {
           type="button"
           onClick={handlePrevLesson}
           disabled={currentIndex <= 0 && (!datesWithNotes.length || currentDate <= datesWithNotes[0])}
-          className="flex-1 px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold text-xs sm:text-sm rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1"
+          className="flex-1 px-4 py-2.5 bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 font-semibold text-xs sm:text-sm rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1 border border-slate-200/60 dark:border-slate-700/60"
         >
           ← Bài trước
         </button>
@@ -308,20 +315,20 @@ function ReviewContent() {
             currentIndex >= datesWithNotes.length - 1 ||
             (!datesWithNotes.length || currentDate >= datesWithNotes[datesWithNotes.length - 1])
           }
-          className="flex-1 px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold text-xs sm:text-sm rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1"
+          className="flex-1 px-4 py-2.5 bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 font-semibold text-xs sm:text-sm rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1 border border-slate-200/60 dark:border-slate-700/60"
         >
           Bài tiếp theo →
         </button>
       </div>
 
       {/* Footer */}
-      <footer className="mt-8 text-center text-xs text-gray-600 flex flex-col items-center gap-2 pt-6 border-t border-gray-200">
-        <p className="text-sm font-semibold text-gray-700" style={{ fontFamily: 'Poppins, sans-serif' }}>
+      <footer className="mt-8 text-center text-xs text-gray-600 dark:text-slate-400 flex flex-col items-center gap-2 pt-6 border-t border-gray-200 dark:border-slate-800">
+        <p className="text-sm font-semibold text-gray-700 dark:text-slate-200" style={{ fontFamily: 'Poppins, sans-serif' }}>
           Easy English, learn English with ease!
         </p>
         <a
           href="mailto:easyenglish.mrhai@gmail.com"
-          className="flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-700 transition-colors"
+          className="flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
         >
           <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
             <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />

@@ -15,10 +15,10 @@ export default function NoteModal({ isOpen, initialNote, onClose, onConfirm }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-xl shadow-2xl transform transition-all duration-200">
-        <h3 className="text-xl font-bold text-gray-800 mb-1">🎉 Ghi chú bài học hôm nay</h3>
-        <p className="text-xs text-gray-500 mb-3">
+    <div className="fixed inset-0 bg-gray-900/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-slate-900 dark:border dark:border-slate-700/80 rounded-2xl p-6 w-full max-w-xl shadow-2xl transform transition-all duration-200">
+        <h3 className="text-xl font-bold text-gray-800 dark:text-slate-100 mb-1">🎉 Ghi chú bài học hôm nay</h3>
+        <p className="text-xs text-gray-500 dark:text-slate-400 mb-3">
           Bạn đã học gì trong 30 phút qua? Sử dụng trình soạn thảo Word để định dạng và ghi chú từ vựng & cấu trúc.
         </p>
 
@@ -33,7 +33,7 @@ export default function NoteModal({ isOpen, initialNote, onClose, onConfirm }) {
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
           >
             Hủy
           </button>
