@@ -285,12 +285,22 @@
         <section>
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Tiến độ 30 ngày qua</h3>
-                <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-md">Lịch sử</span>
+                <span id="periodDisplay" class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-md">Lịch sử</span>
             </div>
             
             <!-- Sắp xếp lại lưới: 6 cột trên mobile (6x5=30), 10 cột trên máy tính (10x3=30) -->
             <div class="grid grid-cols-6 sm:grid-cols-10 gap-2" id="trackerGrid">
                 <!-- Javascript sẽ tạo các ô grid vào đây -->
+            </div>
+
+            <!-- Navigation buttons -->
+            <div class="flex items-center justify-between mt-6 gap-4">
+                <button id="prevBtn" class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200 active:scale-95">
+                    ← Trước
+                </button>
+                <button id="nextBtn" class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200 active:scale-95">
+                    Sau →
+                </button>
             </div>
         </section>
         
@@ -348,6 +358,7 @@
         let studyDates = []; 
         let studyNotes = {}; 
         let savedUserName = "bạn";
+        let currentPeriodOffset = 0; // 0 = current period, -1 = previous, 1 = next
         
         const checkInBtn = document.getElementById('checkInBtn');
         const streakDisplay = document.getElementById('streakCount');
@@ -356,6 +367,9 @@
         const authStatus = document.getElementById('authStatus');
         const greetingMessage = document.getElementById('greetingMessage');
         const userNameDisplay = document.getElementById('userNameDisplay');
+        const periodDisplay = document.getElementById('periodDisplay');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
         const NUMBER_OF_DAYS_TO_SHOW = 30;
 
         // Khởi tạo hệ thống nếu có cấu hình máy chủ
@@ -685,6 +699,17 @@
             confirmCheckIn();
         });
 
+        // Navigation buttons for period switching
+        prevBtn.addEventListener('click', () => {
+            currentPeriodOffset--;
+            renderGrid();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentPeriodOffset++;
+            renderGrid();
+        });
+
         function calculateStreak() {
             if (studyDates.length === 0) return 0;
             
@@ -722,7 +747,14 @@
             const todayStr = getTodayString();
             
             const startDate = new Date();
-            startDate.setDate(startDate.getDate() - (NUMBER_OF_DAYS_TO_SHOW - 1));
+            startDate.setDate(startDate.getDate() - (NUMBER_OF_DAYS_TO_SHOW - 1) + (currentPeriodOffset * NUMBER_OF_DAYS_TO_SHOW));
+            const endDate = new Date(startDate);
+            endDate.setDate(endDate.getDate() + (NUMBER_OF_DAYS_TO_SHOW - 1));
+            
+            // Update period display
+            const startStr = formatDatePretty(`${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}`);
+            const endStr = formatDatePretty(`${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`);
+            periodDisplay.textContent = `${startStr} → ${endStr}`;
 
             for (let i = 0; i < NUMBER_OF_DAYS_TO_SHOW; i++) {
                 const d = new Date(startDate);
