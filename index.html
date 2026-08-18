@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>English 30-Min Tracker</title>
+    <title>⏰ Easy English Reminder</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
@@ -136,6 +136,70 @@
         
         .pulse-btn {
             animation: pulseCheck 2s infinite;
+        }
+
+        /* Congratulations Effect */
+        .congratulations-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .congratulations-text {
+            font-size: 80px;
+            font-weight: 900;
+            color: transparent;
+            background: linear-gradient(45deg, #FF6B6B, #FFA94D, #FFD93D, #6BCB77, #4D96FF, #9D84B7);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: congratsShake 1s cubic-bezier(0.68, -0.55, 0.265, 1.55), congratsGlow 4s ease-in-out forwards;
+            text-shadow: 0 0 20px rgba(255, 100, 100, 0.5);
+            font-family: 'Poppins', sans-serif;
+            transform: scale(0);
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            animation: confettiFall 3s ease-out forwards;
+        }
+
+        @keyframes congratsShake {
+            0%, 100% { transform: scale(0) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(-5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        @keyframes congratsGlow {
+            0% {
+                opacity: 1;
+                filter: drop-shadow(0 0 20px rgba(255, 200, 100, 0.8));
+            }
+            100% {
+                opacity: 0.3;
+                filter: drop-shadow(0 0 40px rgba(255, 200, 100, 0.3));
+            }
+        }
+
+        @keyframes confettiFall {
+            0% {
+                opacity: 1;
+                transform: translateY(-100vh) rotateZ(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh) rotateZ(720deg);
+            }
         }
 
         /* Thêm style cho phần trích dẫn */
@@ -537,6 +601,7 @@
         }
 
         async function confirmCheckIn() {
+            // Fireworks are now triggered from the button click event listener above
             const today = getTodayString();
             const noteText = dailyNoteInput.value.trim();
             
@@ -574,7 +639,40 @@
             }
         }
 
-        document.getElementById('confirmNoteBtn').addEventListener('click', confirmCheckIn);
+        // Congratulations effect function
+        function createCongratulationsEffect() {
+            // Create container
+            const container = document.createElement('div');
+            container.className = 'congratulations-container';
+            
+            // Create congratulations text
+            const text = document.createElement('div');
+            text.className = 'congratulations-text';
+            text.textContent = '🎉 Excellent! 🎉';
+            container.appendChild(text);
+            
+            // Create confetti particles
+            const confettiColors = ['#FF6B6B', '#FFA94D', '#FFD93D', '#6BCB77', '#4D96FF', '#9D84B7'];
+            for (let i = 0; i < 80; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.backgroundColor = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+                confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+                confetti.style.animationDuration = (3 + Math.random() * 2) + 's';
+                container.appendChild(confetti);
+            }
+            
+            document.body.appendChild(container);
+            
+            // Remove container after animation completes
+            setTimeout(() => container.remove(), 5500);
+        }
+
+        document.getElementById('confirmNoteBtn').addEventListener('click', (e) => {
+            createCongratulationsEffect();
+            confirmCheckIn();
+        });
 
         function calculateStreak() {
             if (studyDates.length === 0) return 0;
