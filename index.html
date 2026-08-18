@@ -251,9 +251,9 @@
                 Đừng chờ đến khi có nhiều thời gian mới bắt đầu học. 30 phút mỗi ngày có thể không tạo ra sự thay đổi ngay lập tức, nhưng sự kiên trì mỗi ngày sẽ tạo nên khác biệt lớn theo thời gian.
             </p>
             
-            <div id="authStatus" class="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm transition-all duration-300">
+            <!-- <div id="authStatus" class="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm transition-all duration-300">
                 <span class="animate-pulse w-2 h-2 rounded-full bg-yellow-400"></span> Đang kết nối máy chủ...
-            </div>
+            </div> -->
             
             <!-- Thêm câu chào mừng ở đây -->
             <div id="greetingMessage" class="mt-6 text-md font-semibold text-gray-700 hidden">
@@ -359,7 +359,7 @@
             studyNotes = JSON.parse(localStorage.getItem('english_30min_notes_v2')) || {};
             savedUserName = localStorage.getItem('english_30min_username') || "bạn";
             
-            authStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-gray-400"></span> Lưu trữ trên trình duyệt`;
+            // authStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-gray-400"></span> Lưu trữ trên trình duyệt`;
             
             // Hiện câu chào mặc định khi dùng local storage
             greetingMessage.classList.remove('hidden');
