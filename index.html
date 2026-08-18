@@ -553,20 +553,30 @@
         const noteModal = document.getElementById('noteModal');
         const noteModalContent = document.getElementById('noteModalContent');
         const dailyNoteInput = document.getElementById('dailyNote');
+        let editingDate = null; // Track which date is being edited
 
-        function openModal() {
+        function openModal(dateToEdit = null) {
+            editingDate = dateToEdit; // Set the date being edited
             noteModal.classList.remove('hidden');
             // Kích hoạt re-flow để animation chạy mượt
             void noteModal.offsetWidth;
             noteModal.classList.remove('opacity-0');
             noteModalContent.classList.remove('scale-95');
-            dailyNoteInput.value = '';
+            
+            if (dateToEdit && studyNotes[dateToEdit]) {
+                // Editing existing note
+                dailyNoteInput.value = studyNotes[dateToEdit];
+            } else {
+                // New note
+                dailyNoteInput.value = '';
+            }
             dailyNoteInput.focus();
         }
 
         function closeModal() {
             noteModal.classList.add('opacity-0');
             noteModalContent.classList.add('scale-95');
+            editingDate = null;
             setTimeout(() => {
                 noteModal.classList.add('hidden');
             }, 300);
@@ -664,6 +674,33 @@
             }
         }
 
+        async function confirmEditNote() {
+            // Save edited note for existing date
+            if (editingDate) {
+                const noteText = dailyNoteInput.value.trim();
+                if (noteText) {
+                    studyNotes[editingDate] = noteText;
+                } else {
+                    delete studyNotes[editingDate];
+                }
+                
+                closeModal();
+                renderGrid(); // Refresh the grid to show updated tooltip
+
+                // Lưu dữ liệu lên đám mây Firebase
+                if (currentUser && db) {
+                    try {
+                        const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'trackingData', 'history');
+                        await setDoc(docRef, { dates: studyDates, notes: studyNotes }, { merge: true });
+                    } catch (error) {
+                        console.error("Lỗi khi đồng bộ:", error);
+                    }
+                } else {
+                    localStorage.setItem('english_30min_notes_v2', JSON.stringify(studyNotes));
+                }
+            }
+        }
+
         // Congratulations effect function
         function createCongratulationsEffect() {
             // Create container
@@ -695,8 +732,14 @@
         }
 
         document.getElementById('confirmNoteBtn').addEventListener('click', (e) => {
-            createCongratulationsEffect();
-            confirmCheckIn();
+            if (editingDate) {
+                // Editing existing note
+                confirmEditNote();
+            } else {
+                // New check-in with celebration
+                createCongratulationsEffect();
+                confirmCheckIn();
+            }
         });
 
         // Navigation buttons for period switching
@@ -777,9 +820,16 @@
                     if (studyNotes[dateStr]) {
                         tooltipText += `\n${studyNotes[dateStr]}`;
                     }
+                    // Allow editing notes for completed days in the current period
+                    if (currentPeriodOffset === 0) {
+                        box.style.cursor = 'pointer';
+                        box.addEventListener('click', () => openModal(dateStr));
+                    }
                 } else if (dateStr === todayStr) {
                     box.classList.add('today');
                     tooltipText = "Hôm nay - Cố lên nhé!";
+                } else if (dateStr < todayStr) {
+                    tooltipText += ' - Không học bài';
                 } else {
                     tooltipText += ' - Chưa học';
                 }
