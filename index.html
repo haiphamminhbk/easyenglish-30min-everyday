@@ -85,8 +85,8 @@
         }
 
         /* Tooltip */
-        .day-box[title]:hover::after {
-            content: attr(title);
+        .day-box[data-title]:hover::after {
+            content: attr(data-title);
             position: absolute;
             background: #1F2937;
             color: #fff;
@@ -94,21 +94,22 @@
             border-radius: 8px;
             font-size: 12px;
             font-weight: 400;
-            bottom: 100%;
+            bottom: 120%;
             left: 50%;
-            transform: translateX(-50%) translateY(-8px);
+            transform: translateX(-50%);
             white-space: pre-wrap; /* Cho phép xuống dòng */
             width: max-content;
             max-width: 250px;
             z-index: 50;
-            opacity: 0;
+            opacity: 1;
             animation: fadeIn 0.2s forwards;
             pointer-events: none;
             line-height: 1.4;
-            text-align: center;
+            text-align: left;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         
-        .day-box[title]:hover::before {
+        .day-box[data-title]:hover::before {
             content: '';
             position: absolute;
             bottom: 100%;
@@ -118,7 +119,7 @@
             border-style: solid;
             border-color: #1F2937 transparent transparent transparent;
             z-index: 50;
-            opacity: 0;
+            opacity: 1;
             animation: fadeIn 0.2s forwards;
             pointer-events: none;
         }
@@ -631,9 +632,9 @@
 
                 if (studyDates.includes(dateStr)) {
                     box.classList.add('completed');
-                    tooltipText += ' - Đã học';
+                    tooltipText += ' - Đã học: ';
                     if (studyNotes[dateStr]) {
-                        tooltipText += `\n📝: ${studyNotes[dateStr]}`;
+                        tooltipText += `\n${studyNotes[dateStr]}`;
                     }
                 } else if (dateStr === todayStr) {
                     box.classList.add('today');
@@ -642,7 +643,7 @@
                     tooltipText += ' - Chưa học';
                 }
 
-                box.title = tooltipText;
+                box.dataset.title = tooltipText;
 
                 if (dateStr === todayStr && !studyDates.includes(dateStr)) {
                     box.addEventListener('click', handleCheckIn);
