@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getTodayString, formatDatePretty, calculateStreak, getPeriodRange, NUMBER_OF_DAYS_TO_SHOW } from '@/lib/tracker';
+import {
+  getTodayString,
+  formatDatePretty,
+  calculateStreak,
+  getPeriodRange,
+  stripFormatting,
+  NUMBER_OF_DAYS_TO_SHOW,
+} from '@/lib/tracker';
 import { initStorage, saveStudyData, saveUsername, loadLocalData } from '@/lib/storage';
 import NoteModal from '@/components/NoteModal';
 import NameModal from '@/components/NameModal';
@@ -99,7 +106,7 @@ export default function TrackerPage() {
     let tooltip = formatDatePretty(dateStr);
     if (isCompleted) {
       tooltip += ' - Đã học: ';
-      if (hasNote) tooltip += `\n${studyNotes[dateStr]}`;
+      if (hasNote) tooltip += `\n${stripFormatting(studyNotes[dateStr])}`;
       if (isPast) tooltip += '\n(Nhấn để mở trang ôn tập bài học 📖)';
     } else if (isToday) {
       tooltip = 'Hôm nay - Cố lên nhé!';

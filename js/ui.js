@@ -2,7 +2,7 @@
  * UI Components, Modals, and Grid Rendering
  */
 
-import { NUMBER_OF_DAYS_TO_SHOW, getTodayString, formatDatePretty, calculateStreak, getPeriodRange } from './tracker.js';
+import { NUMBER_OF_DAYS_TO_SHOW, getTodayString, formatDatePretty, calculateStreak, getPeriodRange, stripFormatting } from './tracker.js';
 import { setupWordEditor, updateWordCount } from './editor.js';
 
 // DOM Selectors Cache
@@ -213,7 +213,7 @@ export function renderGrid({
 
             tooltipText += ' - Đã học: ';
             if (hasNote) {
-                tooltipText += `\n${studyNotes[dateStr]}`;
+                tooltipText += `\n${stripFormatting(studyNotes[dateStr])}`;
             }
             if (dateStr < todayStr) {
                 tooltipText += `\n(Nhấn để mở trang ôn tập bài học 📖)`;
