@@ -4,233 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⏰ Easy English Reminder</title>
+    
+    <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Poppins:wght@700;800&display=swap');
-
-        :root {
-            --primary: #4F46E5;
-            --primary-hover: #4338CA;
-            --success: #10B981;
-            --text-dark: #1F2937;
-            --text-light: #6B7280;
-            --box-empty: #E5E7EB;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden; /* Ngăn cuộn ngang */
-            overflow-y: auto; /* MỞ CUỘN DỌC để xem hết 30 ngày trên màn hình nhỏ */
-            color: var(--text-dark);
-            background-color: #0f172a; /* Fallback background */
-        }
-
-        /* 3D Canvas Background */
-        #bgCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1; /* Đặt sau tất cả nội dung */
-        }
-
-        /* Tùy chỉnh hiệu ứng cho thẻ chứa chính */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        }
-
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-        }
-
-        .day-box {
-            aspect-ratio: 1;
-            background-color: var(--box-empty);
-            border-radius: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 14px;
-            font-weight: 600;
-            color: #9CA3AF;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            position: relative;
-        }
-
-        .day-box:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .day-box.completed {
-            background-color: var(--success);
-            color: white;
-            box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.39);
-        }
-
-        .day-box.today:not(.completed) {
-            border: 2px dashed var(--primary);
-            color: var(--primary);
-            background-color: #EEF2FF;
-        }
-
-        /* Tooltip */
-        .day-box[data-title]:hover::after {
-            content: attr(data-title);
-            position: absolute;
-            background: #1F2937;
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 400;
-            bottom: 120%;
-            left: 50%;
-            transform: translateX(-50%);
-            white-space: pre-wrap; /* Cho phép xuống dòng */
-            width: max-content;
-            max-width: 250px;
-            z-index: 50;
-            opacity: 1;
-            animation: fadeIn 0.2s forwards;
-            pointer-events: none;
-            line-height: 1.4;
-            text-align: left;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-        .day-box[data-title]:hover::before {
-            content: '';
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 6px;
-            border-style: solid;
-            border-color: #1F2937 transparent transparent transparent;
-            z-index: 50;
-            opacity: 1;
-            animation: fadeIn 0.2s forwards;
-            pointer-events: none;
-        }
-
-        @keyframes fadeIn {
-            to { opacity: 1; }
-        }
-
-        @keyframes pulseCheck {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        .pulse-btn {
-            animation: pulseCheck 2s infinite;
-        }
-
-        /* Congratulations Effect */
-        .congratulations-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .congratulations-text {
-            font-size: 80px;
-            font-weight: 900;
-            color: transparent;
-            background: linear-gradient(45deg, #FF6B6B, #FFA94D, #FFD93D, #6BCB77, #4D96FF, #9D84B7);
-            background-size: 300% 300%;
-            -webkit-background-clip: text;
-            background-clip: text;
-            animation: congratsShake 1s cubic-bezier(0.68, -0.55, 0.265, 1.55), congratsGlow 4s ease-in-out forwards;
-            text-shadow: 0 0 20px rgba(255, 100, 100, 0.5);
-            font-family: 'Poppins', sans-serif;
-            transform: scale(0);
-        }
-
-        .confetti {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            pointer-events: none;
-            animation: confettiFall 3s ease-out forwards;
-        }
-
-        @keyframes congratsShake {
-            0%, 100% { transform: scale(0) rotate(0deg); }
-            50% { transform: scale(1.2) rotate(-5deg); }
-            100% { transform: scale(1) rotate(0deg); }
-        }
-
-        @keyframes congratsGlow {
-            0% {
-                opacity: 1;
-                filter: drop-shadow(0 0 20px rgba(255, 200, 100, 0.8));
-            }
-            100% {
-                opacity: 0.3;
-                filter: drop-shadow(0 0 40px rgba(255, 200, 100, 0.3));
-            }
-        }
-
-        @keyframes confettiFall {
-            0% {
-                opacity: 1;
-                transform: translateY(-100vh) rotateZ(0deg);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(100vh) rotateZ(720deg);
-            }
-        }
-
-        /* Thêm style cho phần trích dẫn */
-        blockquote {
-            position: relative;
-            background: #f8fafc;
-            border-left: 4px solid var(--primary);
-            margin: 1.5rem 0;
-            padding: 1rem 1.2rem;
-            border-radius: 0 0.5rem 0.5rem 0;
-            color: #4b5563;
-            font-style: italic;
-        }
-        blockquote p {
-            margin-bottom: 0.5rem;
-        }
-        blockquote p:last-child {
-            margin-bottom: 0;
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--primary);
-            font-style: normal;
-        }
-    </style>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="flex items-center justify-center min-h-screen p-4 sm:p-8">
 
-    <!-- Nền 3D Canvas -->
+    <!-- 3D Background Canvas -->
     <canvas id="bgCanvas"></canvas>
 
-    <!-- Khung nội dung chính -->
+    <!-- Main Content Container -->
     <main class="glass-panel w-full max-w-lg p-8 rounded-3xl relative z-10 mx-auto">
         
         <header class="text-center mb-8">
@@ -241,7 +28,7 @@
                 Dành <strong>30 phút</strong> mỗi ngày để nâng cao trình độ tiếng Anh. Hôm nay bạn đã hoàn thành mục tiêu chưa?
             </p>
 
-            <!-- Khối trích dẫn (Quotation) -->
+            <!-- Quotation -->
             <blockquote class="text-left text-sm shadow-sm">
                 <p>“A journey of a thousand miles begins with a single step.”</p>
                 <p>Hành trình ngàn dặm bắt đầu bằng một bước đi.</p>
@@ -251,16 +38,18 @@
                 Đừng chờ đến khi có nhiều thời gian mới bắt đầu học. 30 phút mỗi ngày có thể không tạo ra sự thay đổi ngay lập tức, nhưng sự kiên trì mỗi ngày sẽ tạo nên khác biệt lớn theo thời gian.
             </p>
             
-            <!-- <div id="authStatus" class="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm transition-all duration-300">
-                <span class="animate-pulse w-2 h-2 rounded-full bg-yellow-400"></span> Đang kết nối máy chủ...
-            </div> -->
+            <!-- Auth / Sync status (optional display) -->
+            <div id="authStatus" class="mt-4 hidden inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm transition-all duration-300">
+                <span class="animate-pulse w-2 h-2 rounded-full bg-yellow-400"></span> Đang kết nối...
+            </div>
             
-            <!-- Thêm câu chào mừng ở đây -->
+            <!-- User Greeting -->
             <div id="greetingMessage" class="mt-6 text-md font-semibold text-gray-700 hidden">
                 Xin chào <span id="userNameDisplay" class="text-indigo-600 cursor-pointer hover:text-indigo-800 transition-colors" title="Nhấn để đổi tên">bạn ✏️</span>! Bạn đã kiên trì để đạt được:
             </div>
         </header>
 
+        <!-- Stats Section -->
         <div class="flex justify-between gap-4 mb-8">
             <div class="flex-1 bg-white rounded-2xl p-4 text-center border border-gray-100 shadow-sm">
                 <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Chuỗi ngày</p>
@@ -278,22 +67,24 @@
             </div>
         </div>
 
+        <!-- Check-in Action Button -->
         <button id="checkInBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform shadow-lg hover:shadow-indigo-500/30 active:scale-95 text-lg mb-8 pulse-btn disabled:opacity-75 disabled:cursor-not-allowed">
             Hoàn thành 30 phút! 🚀
         </button>
 
+        <!-- 30-Day Tracker Grid Section -->
         <section>
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Tiến độ 30 ngày qua</h3>
                 <span id="periodDisplay" class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-md">Lịch sử</span>
             </div>
             
-            <!-- Sắp xếp lại lưới: 6 cột trên mobile (6x5=30), 10 cột trên máy tính (10x3=30) -->
+            <!-- Grid: 6 cols on mobile (6x5=30), 10 cols on desktop (10x3=30) -->
             <div class="grid grid-cols-6 sm:grid-cols-10 gap-2" id="trackerGrid">
-                <!-- Javascript sẽ tạo các ô grid vào đây -->
+                <!-- Javascript populates day boxes -->
             </div>
 
-            <!-- Navigation buttons -->
+            <!-- Navigation Buttons -->
             <div class="flex items-center justify-between mt-6 gap-4">
                 <button id="prevBtn" class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200 active:scale-95">
                     ← Trước
@@ -303,11 +94,8 @@
                 </button>
             </div>
         </section>
-        
-        <!-- <footer class="mt-8 text-center text-xs text-gray-400 flex flex-col items-center gap-1">
-            <span>Dữ liệu của bạn được đồng bộ an toàn trên đám mây ☁️</span>
-        </footer> -->
 
+        <!-- Footer -->
         <footer class="mt-12 text-center text-xs text-gray-600 flex flex-col items-center gap-3 pt-6 border-t border-gray-200">
             <p class="text-sm font-semibold text-gray-700" style="font-family: 'Poppins', sans-serif;">Easy English, learn English with ease!</p>
             <a href="mailto:easyenglish.mrhai@gmail.com" class="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 transition-colors">
@@ -320,7 +108,7 @@
         </footer>
     </main>
 
-    <!-- Modal Pop-up Ghi chú -->
+    <!-- Note Modal -->
     <div id="noteModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center transition-opacity opacity-0">
         <div class="bg-white rounded-2xl p-6 w-[90%] max-w-md shadow-2xl transform scale-95 transition-transform duration-300" id="noteModalContent">
             <h3 class="text-xl font-bold text-gray-800 mb-2">🎉 Hoàn thành xuất sắc!</h3>
@@ -333,7 +121,7 @@
         </div>
     </div>
 
-    <!-- Modal Pop-up Đổi Tên -->
+    <!-- Name Modal -->
     <div id="nameModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center transition-opacity opacity-0">
         <div class="bg-white rounded-2xl p-6 w-[90%] max-w-sm shadow-2xl transform scale-95 transition-transform duration-300" id="nameModalContent">
             <h3 class="text-xl font-bold text-gray-800 mb-2">👋 Xin chào!</h3>
@@ -346,532 +134,7 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'english-tracker-v1';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        
-        let app, auth, db, currentUser = null;
-        let studyDates = []; 
-        let studyNotes = {}; 
-        let savedUserName = "bạn";
-        let currentPeriodOffset = 0; // 0 = current period, -1 = previous, 1 = next
-        
-        const checkInBtn = document.getElementById('checkInBtn');
-        const streakDisplay = document.getElementById('streakCount');
-        const totalDisplay = document.getElementById('totalDays');
-        const gridContainer = document.getElementById('trackerGrid');
-        const authStatus = document.getElementById('authStatus');
-        const greetingMessage = document.getElementById('greetingMessage');
-        const userNameDisplay = document.getElementById('userNameDisplay');
-        const periodDisplay = document.getElementById('periodDisplay');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const NUMBER_OF_DAYS_TO_SHOW = 30;
-
-        // Khởi tạo hệ thống nếu có cấu hình máy chủ
-        if (firebaseConfig) {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-            initAuth();
-        } else {
-            // Chạy chế độ offline nếu không có cấu hình máy chủ
-            studyDates = JSON.parse(localStorage.getItem('english_30min_v2')) || [];
-            studyNotes = JSON.parse(localStorage.getItem('english_30min_notes_v2')) || {};
-            savedUserName = localStorage.getItem('english_30min_username') || "bạn";
-            
-            // authStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-gray-400"></span> Lưu trữ trên trình duyệt`;
-            
-            // Hiện câu chào mặc định khi dùng local storage
-            greetingMessage.classList.remove('hidden');
-            userNameDisplay.innerText = savedUserName === "bạn" ? "bạn ✏️" : savedUserName;
-            
-            updateUI();
-        }
-
-        async function initAuth() {
-            try {
-                if (typeof __initial_auth_token !== 'undefined') {
-                    // Ưu tiên đăng nhập bằng tài khoản (thường là Gmail) bạn đang dùng
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Lỗi đăng nhập:", error);
-                authStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> Lỗi kết nối`;
-            }
-        }
-
-        if (auth) {
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    currentUser = user;
-                    authStatus.innerHTML = user.isAnonymous 
-                        ? `<span class="w-2 h-2 rounded-full bg-yellow-500"></span> Đang dùng Ẩn danh (Không lưu chéo thiết bị)` 
-                        : `<span class="w-2 h-2 rounded-full bg-green-500"></span> Đã đồng bộ tài khoản ☁️`;
-                        
-                    // Hiển thị tên người dùng nếu có (sau khi đăng nhập)
-                    greetingMessage.classList.remove('hidden');
-                    
-                    // Ưu tiên tên từ Firebase, sau đó đến LocalStorage
-                    if (user.displayName) {
-                        savedUserName = user.displayName;
-                    } else {
-                        savedUserName = localStorage.getItem('english_30min_username') || "bạn";
-                    }
-                    userNameDisplay.innerText = savedUserName === "bạn" ? "bạn ✏️" : savedUserName;
-                    
-                    setupFirestoreListener();
-                } else {
-                    currentUser = null;
-                }
-            });
-        }
-
-        function setupFirestoreListener() {
-            if (!currentUser || !db) return;
-            const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'trackingData', 'history');
-            
-            // Lắng nghe thay đổi dữ liệu realtime từ đám mây
-            onSnapshot(docRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    studyDates = data.dates || [];
-                    studyNotes = data.notes || {};
-                    if (data.username) {
-                        savedUserName = data.username;
-                        localStorage.setItem('english_30min_username', savedUserName); // Đồng bộ xuống local
-                        userNameDisplay.innerText = savedUserName === "bạn" ? "bạn ✏️" : savedUserName;
-                    }
-                } else {
-                    studyDates = [];
-                    studyNotes = {};
-                }
-                updateUI();
-            }, (error) => {
-                console.error("Lỗi tải dữ liệu:", error);
-                authStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> Lỗi tải dữ liệu`;
-            });
-        }
-
-        let scene, camera, renderer, particles;
-
-        function init3DBackground() {
-            const canvas = document.getElementById('bgCanvas');
-            scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0x0f172a, 0.001);
-
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 2000);
-            camera.position.z = 1000;
-
-            renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.setSize(window.innerWidth, window.innerHeight);
-
-            const geometry = new THREE.BufferGeometry();
-            const particleCount = 1500;
-            const positions = new Float32Array(particleCount * 3);
-            const colors = new Float32Array(particleCount * 3);
-            const color = new THREE.Color();
-
-            for (let i = 0; i < particleCount; i++) {
-                positions[i * 3] = (Math.random() - 0.5) * 3000;
-                positions[i * 3 + 1] = (Math.random() - 0.5) * 3000;
-                positions[i * 3 + 2] = (Math.random() - 0.5) * 3000;
-
-                color.setHSL(0.6 + Math.random() * 0.2, 0.8, 0.5 + Math.random() * 0.3);
-                colors[i * 3] = color.r;
-                colors[i * 3 + 1] = color.g;
-                colors[i * 3 + 2] = color.b;
-            }
-
-            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-            const material = new THREE.PointsMaterial({
-                size: 6,
-                vertexColors: true,
-                transparent: true,
-                opacity: 0.8,
-                sizeAttenuation: true
-            });
-
-            particles = new THREE.Points(geometry, material);
-            scene.add(particles);
-
-            window.addEventListener('resize', onWindowResize, false);
-            document.addEventListener('mousemove', onDocumentMouseMove, false);
-        }
-
-        let mouseX = 0;
-        let mouseY = 0;
-        let windowHalfX = window.innerWidth / 2;
-        let windowHalfY = window.innerHeight / 2;
-
-        function onDocumentMouseMove(event) {
-            mouseX = (event.clientX - windowHalfX) * 0.5;
-            mouseY = (event.clientY - windowHalfY) * 0.5;
-        }
-
-        function onWindowResize() {
-            windowHalfX = window.innerWidth / 2;
-            windowHalfY = window.innerHeight / 2;
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        function animate3D() {
-            requestAnimationFrame(animate3D);
-            particles.rotation.x += 0.0002;
-            particles.rotation.y += 0.0005;
-            camera.position.x += (mouseX - camera.position.x) * 0.05;
-            camera.position.y += (-mouseY - camera.position.y) * 0.05;
-            camera.lookAt(scene.position);
-            renderer.render(scene, camera);
-        }
-
-        function getTodayString() {
-            const today = new Date();
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const day = String(today.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-
-        function formatDatePretty(dateString) {
-            const [year, month, day] = dateString.split('-');
-            return `${day}/${month}/${year}`;
-        }
-
-        // Logic Modal
-        const noteModal = document.getElementById('noteModal');
-        const noteModalContent = document.getElementById('noteModalContent');
-        const dailyNoteInput = document.getElementById('dailyNote');
-        let editingDate = null; // Track which date is being edited
-
-        function openModal(dateToEdit = null) {
-            editingDate = dateToEdit; // Set the date being edited
-            noteModal.classList.remove('hidden');
-            // Kích hoạt re-flow để animation chạy mượt
-            void noteModal.offsetWidth;
-            noteModal.classList.remove('opacity-0');
-            noteModalContent.classList.remove('scale-95');
-            
-            if (dateToEdit && studyNotes[dateToEdit]) {
-                // Editing existing note
-                dailyNoteInput.value = studyNotes[dateToEdit];
-            } else {
-                // New note
-                dailyNoteInput.value = '';
-            }
-            dailyNoteInput.focus();
-        }
-
-        function closeModal() {
-            noteModal.classList.add('opacity-0');
-            noteModalContent.classList.add('scale-95');
-            editingDate = null;
-            setTimeout(() => {
-                noteModal.classList.add('hidden');
-            }, 300);
-        }
-
-        document.getElementById('cancelNoteBtn').addEventListener('click', closeModal);
-
-        // Logic Modal Đổi Tên
-        const nameModal = document.getElementById('nameModal');
-        const nameModalContent = document.getElementById('nameModalContent');
-        const userNameInput = document.getElementById('userNameInput');
-
-        userNameDisplay.addEventListener('click', () => {
-            nameModal.classList.remove('hidden');
-            void nameModal.offsetWidth;
-            nameModal.classList.remove('opacity-0');
-            nameModalContent.classList.remove('scale-95');
-            userNameInput.value = savedUserName === "bạn" ? "" : savedUserName;
-            userNameInput.focus();
-        });
-
-        function closeNameModal() {
-            nameModal.classList.add('opacity-0');
-            nameModalContent.classList.add('scale-95');
-            setTimeout(() => {
-                nameModal.classList.add('hidden');
-            }, 300);
-        }
-
-        document.getElementById('cancelNameBtn').addEventListener('click', closeNameModal);
-
-        document.getElementById('confirmNameBtn').addEventListener('click', async () => {
-            const newName = userNameInput.value.trim();
-            if (newName) {
-                savedUserName = newName;
-                localStorage.setItem('english_30min_username', savedUserName);
-                userNameDisplay.innerText = savedUserName === "bạn" ? "bạn ✏️" : savedUserName;
-                
-                // Nếu có dùng đám mây thì lưu luôn lên đám mây
-                if (currentUser && db) {
-                    try {
-                        const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'trackingData', 'history');
-                        await setDoc(docRef, { username: savedUserName }, { merge: true });
-                    } catch (error) {
-                        console.error("Lỗi lưu tên:", error);
-                    }
-                }
-            }
-            closeNameModal();
-        });
-
-        async function handleCheckIn() {
-            const today = getTodayString();
-            if (!studyDates.includes(today)) {
-                openModal();
-            }
-        }
-
-        async function confirmCheckIn() {
-            // Fireworks are now triggered from the button click event listener above
-            const today = getTodayString();
-            const noteText = dailyNoteInput.value.trim();
-            
-            if (!studyDates.includes(today)) {
-                studyDates.push(today);
-                studyDates.sort();
-                
-                if (noteText) {
-                    studyNotes[today] = noteText;
-                }
-                
-                checkInBtn.innerText = "Tuyệt vời! Đã hoàn thành 🎉";
-                checkInBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700', 'pulse-btn');
-                checkInBtn.classList.add('bg-green-500', 'hover:bg-green-600', 'scale-105');
-                
-                setTimeout(() => {
-                    checkInBtn.classList.remove('scale-105');
-                }, 200);
-
-                closeModal();
-                updateUI();
-
-                // Lưu dữ liệu lên đám mây Firebase
-                if (currentUser && db) {
-                    try {
-                        const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'trackingData', 'history');
-                        await setDoc(docRef, { dates: studyDates, notes: studyNotes }, { merge: true });
-                    } catch (error) {
-                        console.error("Lỗi khi đồng bộ:", error);
-                    }
-                } else {
-                    localStorage.setItem('english_30min_v2', JSON.stringify(studyDates));
-                    localStorage.setItem('english_30min_notes_v2', JSON.stringify(studyNotes));
-                }
-            }
-        }
-
-        async function confirmEditNote() {
-            // Save edited note for existing date
-            if (editingDate) {
-                const noteText = dailyNoteInput.value.trim();
-                if (noteText) {
-                    studyNotes[editingDate] = noteText;
-                } else {
-                    delete studyNotes[editingDate];
-                }
-                
-                closeModal();
-                renderGrid(); // Refresh the grid to show updated tooltip
-
-                // Lưu dữ liệu lên đám mây Firebase
-                if (currentUser && db) {
-                    try {
-                        const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'trackingData', 'history');
-                        await setDoc(docRef, { dates: studyDates, notes: studyNotes }, { merge: true });
-                    } catch (error) {
-                        console.error("Lỗi khi đồng bộ:", error);
-                    }
-                } else {
-                    localStorage.setItem('english_30min_notes_v2', JSON.stringify(studyNotes));
-                }
-            }
-        }
-
-        // Congratulations effect function
-        function createCongratulationsEffect() {
-            // Create container
-            const container = document.createElement('div');
-            container.className = 'congratulations-container';
-            
-            // Create congratulations text
-            const text = document.createElement('div');
-            text.className = 'congratulations-text';
-            text.textContent = '🎉 Excellent! 🎉';
-            container.appendChild(text);
-            
-            // Create confetti particles
-            const confettiColors = ['#FF6B6B', '#FFA94D', '#FFD93D', '#6BCB77', '#4D96FF', '#9D84B7'];
-            for (let i = 0; i < 80; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.left = Math.random() * 100 + '%';
-                confetti.style.backgroundColor = confettiColors[Math.floor(Math.random() * confettiColors.length)];
-                confetti.style.animationDelay = (Math.random() * 0.5) + 's';
-                confetti.style.animationDuration = (3 + Math.random() * 2) + 's';
-                container.appendChild(confetti);
-            }
-            
-            document.body.appendChild(container);
-            
-            // Remove container after animation completes
-            setTimeout(() => container.remove(), 5500);
-        }
-
-        document.getElementById('confirmNoteBtn').addEventListener('click', (e) => {
-            if (editingDate) {
-                // Editing existing note
-                confirmEditNote();
-            } else {
-                // New check-in with celebration
-                createCongratulationsEffect();
-                confirmCheckIn();
-            }
-        });
-
-        // Navigation buttons for period switching
-        prevBtn.addEventListener('click', () => {
-            currentPeriodOffset--;
-            renderGrid();
-        });
-
-        nextBtn.addEventListener('click', () => {
-            currentPeriodOffset++;
-            renderGrid();
-        });
-
-        function calculateStreak() {
-            if (studyDates.length === 0) return 0;
-            
-            let streak = 0;
-            const checkDate = new Date();
-            checkDate.setHours(0,0,0,0);
-            
-            const todayStr = getTodayString();
-
-            if (studyDates.includes(todayStr)) {
-                streak = 1;
-                checkDate.setDate(checkDate.getDate() - 1);
-            } else {
-                checkDate.setDate(checkDate.getDate() - 1);
-            }
-
-            while(true) {
-                const year = checkDate.getFullYear();
-                const month = String(checkDate.getMonth() + 1).padStart(2, '0');
-                const day = String(checkDate.getDate()).padStart(2, '0');
-                const dateStr = `${year}-${month}-${day}`;
-
-                if (studyDates.includes(dateStr)) {
-                    streak++;
-                    checkDate.setDate(checkDate.getDate() - 1);
-                } else {
-                    break;
-                }
-            }
-            return streak;
-        }
-
-        function renderGrid() {
-            gridContainer.innerHTML = '';
-            const todayStr = getTodayString();
-            
-            const startDate = new Date();
-            startDate.setDate(startDate.getDate() - (NUMBER_OF_DAYS_TO_SHOW - 1) + (currentPeriodOffset * NUMBER_OF_DAYS_TO_SHOW));
-            const endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + (NUMBER_OF_DAYS_TO_SHOW - 1));
-            
-            // Update period display
-            const startStr = formatDatePretty(`${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}`);
-            const endStr = formatDatePretty(`${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`);
-            periodDisplay.textContent = `${startStr} → ${endStr}`;
-
-            for (let i = 0; i < NUMBER_OF_DAYS_TO_SHOW; i++) {
-                const d = new Date(startDate);
-                d.setDate(d.getDate() + i);
-                
-                const year = d.getFullYear();
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const day = String(d.getDate()).padStart(2, '0');
-                const dateStr = `${year}-${month}-${day}`;
-
-                const box = document.createElement('div');
-                box.className = 'day-box';
-                box.innerText = day; 
-                
-                let tooltipText = formatDatePretty(dateStr);
-
-                if (studyDates.includes(dateStr)) {
-                    box.classList.add('completed');
-                    tooltipText += ' - Đã học: ';
-                    if (studyNotes[dateStr]) {
-                        tooltipText += `\n${studyNotes[dateStr]}`;
-                    }
-                    // Allow editing notes for completed days in the current period
-                    if (currentPeriodOffset === 0) {
-                        box.style.cursor = 'pointer';
-                        box.addEventListener('click', () => openModal(dateStr));
-                    }
-                } else if (dateStr === todayStr) {
-                    box.classList.add('today');
-                    tooltipText = "Hôm nay - Cố lên nhé!";
-                } else if (dateStr < todayStr) {
-                    tooltipText += ' - Không học bài';
-                } else {
-                    tooltipText += ' - Chưa học';
-                }
-
-                box.dataset.title = tooltipText;
-
-                if (dateStr === todayStr && !studyDates.includes(dateStr)) {
-                    box.addEventListener('click', handleCheckIn);
-                }
-
-                gridContainer.appendChild(box);
-            }
-        }
-
-        function updateUI() {
-            const today = getTodayString();
-
-            if (studyDates.includes(today)) {
-                checkInBtn.disabled = true;
-                checkInBtn.innerText = "Đã hoàn thành mục tiêu hôm nay ✔️";
-                checkInBtn.classList.remove('pulse-btn', 'bg-indigo-600', 'hover:bg-indigo-700');
-                checkInBtn.classList.add('bg-green-500', 'cursor-not-allowed', 'opacity-90');
-            } else {
-                checkInBtn.disabled = false;
-                checkInBtn.innerText = "Hoàn thành 30 phút! 🚀";
-                checkInBtn.classList.add('pulse-btn');
-                checkInBtn.classList.remove('bg-green-500', 'cursor-not-allowed', 'opacity-90');
-                checkInBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
-            }
-
-            totalDisplay.innerText = studyDates.length;
-            streakDisplay.innerText = calculateStreak();
-            renderGrid();
-        }
-
-        checkInBtn.addEventListener('click', handleCheckIn);
-
-        window.onload = function() {
-            init3DBackground();
-            animate3D();
-            // Hàm UpdateUI() sẽ được tự động gọi khi dữ liệu từ máy chủ tải xong (onSnapshot)
-        };
-    </script>
+    <!-- Application Entry Script (ES Module) -->
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>
