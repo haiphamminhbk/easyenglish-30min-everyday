@@ -189,6 +189,11 @@
             <div id="authStatus" class="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm transition-all duration-300">
                 <span class="animate-pulse w-2 h-2 rounded-full bg-yellow-400"></span> Đang kết nối máy chủ...
             </div>
+            
+            <!-- Thêm câu chào mừng ở đây -->
+            <div id="greetingMessage" class="mt-6 text-md font-semibold text-gray-700 hidden">
+                Xin chào <span id="userNameDisplay" class="text-indigo-600 cursor-pointer hover:text-indigo-800 transition-colors" title="Nhấn để đổi tên">bạn ✏️</span>! Bạn đã kiên trì để đạt được:
+            </div>
         </header>
 
         <div class="flex justify-between gap-4 mb-8">
@@ -233,11 +238,24 @@
     <div id="noteModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center transition-opacity opacity-0">
         <div class="bg-white rounded-2xl p-6 w-[90%] max-w-md shadow-2xl transform scale-95 transition-transform duration-300" id="noteModalContent">
             <h3 class="text-xl font-bold text-gray-800 mb-2">🎉 Hoàn thành xuất sắc!</h3>
-            <p class="text-sm text-gray-600 mb-4">Bạn đã học gì hôm nay? Hãy ghi chú lại nhé (Tối đa ~300 từ).</p>
+            <p class="text-sm text-gray-600 mb-4">Bạn đã học gì hôm nay? Hãy ghi chú lại nhé (Tối đa ~500 từ).</p>
             <textarea id="dailyNote" rows="4" class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none" placeholder="Ví dụ: Đã học 10 từ vựng chủ đề gia đình, luyện nghe podcast 15 phút..."></textarea>
             <div class="mt-5 flex justify-end gap-3">
                 <button id="cancelNoteBtn" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Hủy</button>
                 <button id="confirmNoteBtn" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-md">Xác nhận & Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Pop-up Đổi Tên -->
+    <div id="nameModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center transition-opacity opacity-0">
+        <div class="bg-white rounded-2xl p-6 w-[90%] max-w-sm shadow-2xl transform scale-95 transition-transform duration-300" id="nameModalContent">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">👋 Xin chào!</h3>
+            <p class="text-sm text-gray-600 mb-4">Bạn tên là gì nhỉ?</p>
+            <input type="text" id="userNameInput" class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" placeholder="Nhập tên của bạn...">
+            <div class="mt-5 flex justify-end gap-3">
+                <button id="cancelNameBtn" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Hủy</button>
+                <button id="confirmNameBtn" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-md">Lưu tên</button>
             </div>
         </div>
     </div>
@@ -253,12 +271,15 @@
         let app, auth, db, currentUser = null;
         let studyDates = []; 
         let studyNotes = {}; 
+        let savedUserName = "bạn";
         
         const checkInBtn = document.getElementById('checkInBtn');
         const streakDisplay = document.getElementById('streakCount');
         const totalDisplay = document.getElementById('totalDays');
         const gridContainer = document.getElementById('trackerGrid');
         const authStatus = document.getElementById('authStatus');
+        const greetingMessage = document.getElementById('greetingMessage');
+        const userNameDisplay = document.getElementById('userNameDisplay');
         const NUMBER_OF_DAYS_TO_SHOW = 30;
 
         // Khởi tạo hệ thống nếu có cấu hình máy chủ
@@ -271,7 +292,14 @@
             // Chạy chế độ offline nếu không có cấu hình máy chủ
             studyDates = JSON.parse(localStorage.getItem('english_30min_v2')) || [];
             studyNotes = JSON.parse(localStorage.getItem('english_30min_notes_v2')) || {};
+            savedUserName = localStorage.getItem('english_30min_username') || "bạn";
+            
             authStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-gray-400"></span> Lưu trữ trên trình duyệt`;
+            
+            // Hiện câu chào mặc định khi dùng local storage
+            greetingMessage.classList.remove('hidden');
+            userNameDisplay.innerText = savedUserName === "bạn" ? "bạn ✏️" : savedUserName;
+            
             updateUI();
         }
 
@@ -296,6 +324,18 @@
                     authStatus.innerHTML = user.isAnonymous 
                         ? `<span class="w-2 h-2 rounded-full bg-yellow-500"></span> Đang dùng Ẩn danh (Không lưu chéo thiết bị)` 
                         : `<span class="w-2 h-2 rounded-full bg-green-500"></span> Đã đồng bộ tài khoản ☁️`;
+                        
+                    // Hiển thị tên người dùng nếu có (sau khi đăng nhập)
+                    greetingMessage.classList.remove('hidden');
+                    
+                    // Ưu tiên tên từ Firebase, sau đó đến LocalStorage
+                    if (user.displayName) {
+                        savedUserName = user.displayName;
+                    } else {
+                        savedUserName = localStorage.getItem('english_30min_username') || "bạn";
+                    }
+                    userNameDisplay.innerText = savedUserName === "bạn" ? "bạn ✏️" : savedUserName;
+                    
                     setupFirestoreListener();
                 } else {
                     currentUser = null;
@@ -313,6 +353,11 @@
                     const data = docSnap.data();
                     studyDates = data.dates || [];
                     studyNotes = data.notes || {};
+                    if (data.username) {
+                        savedUserName = data.username;
+                        localStorage.setItem('english_30min_username', savedUserName); // Đồng bộ xuống local
+                        userNameDisplay.innerText = savedUserName === "bạn" ? "bạn ✏️" : savedUserName;
+                    }
                 } else {
                     studyDates = [];
                     studyNotes = {};
@@ -438,6 +483,50 @@
         }
 
         document.getElementById('cancelNoteBtn').addEventListener('click', closeModal);
+
+        // Logic Modal Đổi Tên
+        const nameModal = document.getElementById('nameModal');
+        const nameModalContent = document.getElementById('nameModalContent');
+        const userNameInput = document.getElementById('userNameInput');
+
+        userNameDisplay.addEventListener('click', () => {
+            nameModal.classList.remove('hidden');
+            void nameModal.offsetWidth;
+            nameModal.classList.remove('opacity-0');
+            nameModalContent.classList.remove('scale-95');
+            userNameInput.value = savedUserName === "bạn" ? "" : savedUserName;
+            userNameInput.focus();
+        });
+
+        function closeNameModal() {
+            nameModal.classList.add('opacity-0');
+            nameModalContent.classList.add('scale-95');
+            setTimeout(() => {
+                nameModal.classList.add('hidden');
+            }, 300);
+        }
+
+        document.getElementById('cancelNameBtn').addEventListener('click', closeNameModal);
+
+        document.getElementById('confirmNameBtn').addEventListener('click', async () => {
+            const newName = userNameInput.value.trim();
+            if (newName) {
+                savedUserName = newName;
+                localStorage.setItem('english_30min_username', savedUserName);
+                userNameDisplay.innerText = savedUserName === "bạn" ? "bạn ✏️" : savedUserName;
+                
+                // Nếu có dùng đám mây thì lưu luôn lên đám mây
+                if (currentUser && db) {
+                    try {
+                        const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'trackingData', 'history');
+                        await setDoc(docRef, { username: savedUserName }, { merge: true });
+                    } catch (error) {
+                        console.error("Lỗi lưu tên:", error);
+                    }
+                }
+            }
+            closeNameModal();
+        });
 
         async function handleCheckIn() {
             const today = getTodayString();
