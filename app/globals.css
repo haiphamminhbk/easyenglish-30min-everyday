@@ -344,36 +344,169 @@ blockquote p:last-child {
 mark {
   background-color: #fef08a;
   color: #713f12;
-  padding: 0.1rem 0.35rem;
-  border-radius: 0.25rem;
-  font-weight: 600;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.35rem;
+  font-weight: 700;
 }
 
 .dark mark {
-  background-color: rgba(254, 240, 138, 0.22);
-  color: #fef08a;
-  border: 1px solid rgba(254, 240, 138, 0.35);
+  background-color: #fbbf24;
+  color: #0f172a;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.35rem;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-/* Dark mode overrides for TipTap Editor and prose */
+/* TipTap Editor Styles & Dark Mode Fixes */
+.tiptap {
+  min-height: 140px;
+  outline: none !important;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  color: #94a3b8;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
 .dark .tiptap p.is-editor-empty:first-child::before {
   color: #64748b;
 }
 
-.dark .tiptap-content {
+.tiptap p {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+  line-height: 1.65;
+}
+
+.dark .tiptap,
+.dark .tiptap p,
+.dark .tiptap span,
+.dark .tiptap div {
   color: #f1f5f9;
 }
 
-.dark .tiptap-content strong {
-  color: #ffffff;
+.dark .tiptap strong {
+  color: #ffffff !important;
+  font-weight: 700;
 }
 
-.dark .tiptap-content u {
+.dark .tiptap em {
+  color: #e2e8f0 !important;
+}
+
+.dark .tiptap h2,
+.dark .tiptap h3 {
+  color: #f8fafc !important;
+  font-weight: 700;
+}
+
+/* List Styles in TipTap Editor and Formatted Content */
+.tiptap ul,
+.formatted-note-content ul {
+  list-style-type: disc !important;
+  padding-left: 1.5rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.tiptap ol,
+.formatted-note-content ol {
+  list-style-type: decimal !important;
+  padding-left: 1.5rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.tiptap li,
+.formatted-note-content li {
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+  display: list-item !important;
+  line-height: 1.6 !important;
+}
+
+.tiptap li::marker,
+.formatted-note-content li::marker {
+  color: #4f46e5 !important;
+  font-weight: 700 !important;
+}
+
+.dark .tiptap li::marker,
+.dark .formatted-note-content li::marker {
+  color: #818cf8 !important;
+}
+
+/* Nested Lists */
+.tiptap ul ul,
+.formatted-note-content ul ul {
+  list-style-type: circle !important;
+}
+
+.tiptap ol ol,
+.formatted-note-content ol ol {
+  list-style-type: lower-alpha !important;
+}
+
+/* Blockquote in TipTap and Formatted Content */
+.tiptap blockquote,
+.formatted-note-content blockquote {
+  border-left: 4px solid #4f46e5 !important;
+  background: rgba(79, 70, 229, 0.08) !important;
+  padding: 0.6rem 1rem !important;
+  margin: 0.75rem 0 !important;
+  border-radius: 0 0.5rem 0.5rem 0 !important;
+  font-style: italic !important;
+  color: #334155 !important;
+}
+
+.dark .tiptap blockquote,
+.dark .formatted-note-content blockquote {
+  border-left: 4px solid #818cf8 !important;
+  background: rgba(30, 41, 59, 0.7) !important;
+  color: #cbd5e1 !important;
+}
+
+/* Headings in TipTap and Formatted Content */
+.tiptap h2,
+.formatted-note-content h2 {
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  margin-top: 0.75rem !important;
+  margin-bottom: 0.35rem !important;
+  color: #1e293b !important;
+}
+
+.dark .tiptap h2,
+.dark .formatted-note-content h2 {
+  color: #f8fafc !important;
+}
+
+.tiptap h3,
+.formatted-note-content h3 {
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.25rem !important;
+  color: #334155 !important;
+}
+
+.dark .tiptap h3,
+.dark .formatted-note-content h3 {
+  color: #f1f5f9 !important;
+}
+
+.dark .tiptap u {
   text-decoration-color: #818cf8;
 }
 
-.dark .tiptap-content blockquote {
-  background: rgba(15, 23, 42, 0.6);
-  border-left-color: #818cf8;
-  color: #cbd5e1;
+.dark .tiptap mark,
+.dark .tiptap mark strong,
+.dark .tiptap mark * {
+  background-color: #fbbf24 !important;
+  color: #0f172a !important;
+  font-weight: 700 !important;
 }
