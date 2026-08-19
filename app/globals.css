@@ -528,3 +528,255 @@ mark {
   color: #0f172a !important;
   font-weight: 700 !important;
 }
+
+/* ==========================================================================
+   Diary & Journal UI Aesthetics
+   ========================================================================== */
+
+.diary-folio {
+  position: relative;
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow:
+    0 20px 40px -15px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(0, 0, 0, 0.05),
+    -6px 6px 0 -2px rgba(241, 245, 249, 0.9),
+    -12px 12px 0 -4px rgba(226, 232, 240, 0.7);
+  transition: all 0.3s ease;
+}
+
+.dark .diary-folio {
+  background: #1e293b;
+  box-shadow:
+    0 20px 40px -15px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    -6px 6px 0 -2px rgba(30, 41, 59, 0.8),
+    -12px 12px 0 -4px rgba(15, 23, 42, 0.7);
+}
+
+.diary-paper {
+  background-color: #fffdfa;
+  background-image: radial-gradient(rgba(99, 102, 241, 0.08) 1px, transparent 0);
+  background-size: 24px 24px;
+  border-radius: 20px;
+  position: relative;
+}
+
+.dark .diary-paper {
+  background-color: #0f172a;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0);
+}
+
+/* Notebook left margin rule */
+.diary-margin-line {
+  border-left: 2px solid rgba(244, 63, 94, 0.25);
+  padding-left: 1.25rem;
+}
+
+.dark .diary-margin-line {
+  border-left: 2px solid rgba(244, 63, 94, 0.35);
+}
+
+/* Washi Tape Accent */
+.washi-tape {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-1deg);
+  width: 110px;
+  height: 26px;
+  background: rgba(251, 191, 36, 0.45);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border-left: 3px dashed rgba(217, 119, 6, 0.4);
+  border-right: 3px dashed rgba(217, 119, 6, 0.4);
+  z-index: 20;
+  pointer-events: none;
+}
+
+.dark .washi-tape {
+  background: rgba(245, 158, 11, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  border-left: 3px dashed rgba(251, 191, 36, 0.4);
+  border-right: 3px dashed rgba(251, 191, 36, 0.4);
+}
+
+/* Bookmark Ribbon */
+.bookmark-ribbon {
+  position: absolute;
+  top: -6px;
+  right: 28px;
+  width: 24px;
+  height: 48px;
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.35);
+  z-index: 20;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+  pointer-events: none;
+}
+
+.dark .bookmark-ribbon {
+  background: linear-gradient(180deg, #f43f5e 0%, #e11d48 100%);
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.45);
+}
+
+/* Diary Date Stamp */
+.diary-stamp {
+  border: 2px dashed rgba(99, 102, 241, 0.3);
+  border-radius: 16px;
+  background: rgba(238, 242, 255, 0.5);
+  transition: all 0.2s ease;
+}
+
+.dark .diary-stamp {
+  border: 2px dashed rgba(129, 140, 248, 0.3);
+  background: rgba(30, 41, 59, 0.7);
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  #bgCanvas,
+  header .flex,
+  .no-print {
+    display: none !important;
+  }
+  .diary-folio {
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+}
+
+/* ==========================================================================
+   3D Aesthetic Muted Teenager Diary & Bullet Journal
+   ========================================================================== */
+
+.flipbook-container {
+  perspective: 1800px;
+}
+
+/* Realistic 3D Paper Stack Thickness under the Notebook */
+.teen-book-stack {
+  position: relative;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.3),
+    3px 3px 0 #f5f3ef,
+    6px 6px 0 #e8e5df,
+    9px 9px 0 #dedad2,
+    12px 12px 16px rgba(0, 0, 0, 0.12);
+  border-radius: 20px;
+}
+
+.dark .teen-book-stack {
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.8),
+    3px 3px 0 #1b212f,
+    6px 6px 0 #131722,
+    9px 9px 0 #0c0f17,
+    12px 12px 20px rgba(0, 0, 0, 0.6);
+}
+
+/* Muted Cozy Warm Ivory Paper */
+.diary-page-sheet {
+  background-color: #fbfaf7;
+  background-image: 
+    linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    radial-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 0);
+  background-size: 100% 28px, 18px 18px;
+  color: #334155;
+  overflow: hidden;
+  height: 100%;
+  border-radius: 18px;
+  box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.02);
+}
+
+.dark .diary-page-sheet {
+  background-color: #121622;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    radial-gradient(rgba(148, 163, 184, 0.04) 1px, transparent 0);
+  background-size: 100% 28px, 18px 18px;
+  color: #e2e8f0;
+  box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.5);
+}
+
+/* Soft Notebook margin line */
+.teen-notebook-margin {
+  border-left: 2px dashed rgba(203, 163, 169, 0.4);
+  padding-left: 14px;
+}
+
+.dark .teen-notebook-margin {
+  border-left: 2px dashed rgba(203, 163, 169, 0.25);
+  padding-left: 14px;
+}
+
+/* Muted Aesthetic Washi Tape */
+.teen-washi-tape {
+  display: inline-block;
+  padding: 2px 12px;
+  background: rgba(228, 224, 218, 0.65);
+  backdrop-filter: blur(2px);
+  border-left: 2px dashed rgba(168, 162, 158, 0.5);
+  border-right: 2px dashed rgba(168, 162, 158, 0.5);
+  transform: rotate(-1deg);
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.dark .teen-washi-tape {
+  background: rgba(44, 53, 72, 0.6);
+  border-left: 2px dashed rgba(100, 116, 139, 0.5);
+  border-right: 2px dashed rgba(100, 116, 139, 0.5);
+}
+
+/* Brushed Rose-Gold Paper Clip */
+.teen-paper-clip {
+  position: absolute;
+  top: -8px;
+  right: 24px;
+  width: 14px;
+  height: 28px;
+  border: 2.5px solid #b89c89;
+  border-radius: 8px 8px 4px 4px;
+  background: transparent;
+  box-shadow: 0 2px 4px rgba(184, 156, 137, 0.25);
+  z-index: 10;
+}
+
+.diary-page-sheet ::-webkit-scrollbar {
+  width: 4px;
+}
+
+.diary-page-sheet ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.diary-page-sheet ::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 4px;
+}
+
+.diary-page-sheet ::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.6);
+}
+
+/* Muted Deep Indigo Linen Cover */
+.teen-diary-cover {
+  background: linear-gradient(145deg, #1e2433 0%, #262f42 50%, #1a202d 100%);
+  color: #f8fafc;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.teen-cover-border {
+  border: 1.5px dashed rgba(214, 197, 166, 0.5);
+  border-radius: 16px;
+  background: rgba(15, 20, 30, 0.4);
+  backdrop-filter: blur(8px);
+}

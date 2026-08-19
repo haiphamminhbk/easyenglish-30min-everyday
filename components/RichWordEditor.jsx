@@ -350,13 +350,13 @@ export default function RichWordEditor({
               type="button"
               onClick={() =>
                 insertTemplate(
-                  `<p><strong>⚡ Nhật ký công việc (Daily Log):</strong></p><ul><li><strong>09:00 - 09:30:</strong> Lên kế hoạch ngày và xử lý email ưu tiên</li><li><strong>14:00 - 14:30:</strong> Focus time - Giải quyết tồn đọng & rà soát dữ liệu</li><li><strong>Kết quả:</strong> Đúng hạn, chất lượng tốt, không có sự cố</li></ul>`
+                  `<p><strong>⚡ Nhật kí công việc (Daily Log):</strong></p><ul><li><strong>09:00 - 09:30:</strong> Lên kế hoạch ngày và xử lý email ưu tiên</li><li><strong>14:00 - 14:30:</strong> Focus time - Giải quyết tồn đọng & rà soát dữ liệu</li><li><strong>Kết quả:</strong> Đúng hạn, chất lượng tốt, không có sự cố</li></ul>`
                 )
               }
               className="editor-btn px-2.5 py-1 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/80 text-blue-800 dark:text-blue-200 bg-blue-50 dark:bg-blue-950/80 border border-blue-200 dark:border-blue-700 font-semibold transition-colors shadow-2xs"
-              title="Chèn mẫu nhật ký làm việc"
+              title="Chèn mẫu nhật kí làm việc"
             >
-              ⚡ Nhật ký
+              ⚡ Nhật kí
             </button>
             <button
               type="button"

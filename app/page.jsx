@@ -17,12 +17,14 @@ import {
   loadLocalData,
   getStoredMode,
   setStoredMode,
+  loadAllDiaryEntries,
 } from '@/lib/storage';
 import NoteModal from '@/components/NoteModal';
 import NameModal from '@/components/NameModal';
 import ThemeToggle from '@/components/ThemeToggle';
 import ModeToggle from '@/components/ModeToggle';
 import ConfettiEffect from '@/components/ConfettiEffect';
+import DiaryFlipBook from '@/components/DiaryFlipBook';
 
 export default function TrackerPage() {
   const router = useRouter();
@@ -36,6 +38,8 @@ export default function TrackerPage() {
 
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [isNameModalOpen, setIsNameModalOpen] = useState(false);
+  const [isDiaryFlipBookOpen, setIsDiaryFlipBookOpen] = useState(false);
+  const [allDiaryEntries, setAllDiaryEntries] = useState([]);
   const [showCelebration, setShowCelebration] = useState(false);
   const [celebrationStreak, setCelebrationStreak] = useState(1);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -224,7 +228,20 @@ export default function TrackerPage() {
               {greeting}
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={() => {
+                const data = loadAllDiaryEntries();
+                setAllDiaryEntries(data.entries);
+                setIsDiaryFlipBookOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/80 hover:bg-amber-100 dark:hover:bg-amber-900/80 text-amber-800 dark:text-amber-300 shadow-sm border border-amber-200/80 dark:border-amber-800/80 active:scale-95 transition-all"
+              title="Mở sổ nhật kí 3D của tôi (Lật trang bằng chuột)"
+            >
+              <span>📖</span>
+              <span>Nhật kí của tôi</span>
+            </button>
             <ModeToggle mode={mode} onModeChange={handleModeChange} />
             <ThemeToggle />
           </div>
@@ -334,7 +351,7 @@ export default function TrackerPage() {
           type="button"
           onClick={handleCheckInClick}
           disabled={isCompletedToday}
-          className={`w-full font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform shadow-lg text-lg mb-8 ${
+          className={`w-full font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform shadow-lg text-lg mb-4 ${
             isCompletedToday
               ? 'bg-emerald-600 dark:bg-emerald-700 text-white cursor-not-allowed opacity-90'
               : isWork
@@ -349,6 +366,41 @@ export default function TrackerPage() {
             : isWork
             ? 'Hoàn thành 30 phút làm việc! 🚀'
             : 'Hoàn thành 30 phút! 🚀'}
+        </button>
+
+        {/* Diary 3D FlipBook Quick Action Card */}
+        <button
+          type="button"
+          onClick={() => {
+            const data = loadAllDiaryEntries();
+            setAllDiaryEntries(data.entries);
+            setIsDiaryFlipBookOpen(true);
+          }}
+          className={`w-full mb-8 p-3.5 rounded-2xl flex items-center justify-between transition-all duration-300 shadow-md hover:shadow-lg border group active:scale-98 text-left ${
+            isWork
+              ? 'bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-transparent hover:bg-amber-500/15 border-amber-300/60 dark:border-amber-700/60 text-amber-950 dark:text-amber-200'
+              : 'bg-gradient-to-r from-indigo-500/10 via-indigo-400/5 to-transparent hover:bg-indigo-500/15 border-indigo-200/80 dark:border-indigo-800/80 text-indigo-950 dark:text-indigo-200'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-400/20 dark:bg-amber-400/10 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform">
+              📖
+            </div>
+            <div>
+              <div className="font-heading text-sm font-extrabold flex items-center gap-1.5">
+                <span>Nhật kí của tôi</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/30 text-amber-900 dark:text-amber-300 font-extrabold">Lật trang 3D ✨</span>
+              </div>
+              <div className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                Xem toàn bộ bài học & công việc đã ghi chép
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-1 transition-transform pr-1">
+            <span>Mở sổ</span>
+            <span>→</span>
+          </div>
         </button>
 
         {/* Monthly Calendar Section */}
@@ -532,6 +584,16 @@ export default function TrackerPage() {
           mode={mode}
           streak={celebrationStreak}
           onComplete={() => setShowCelebration(false)}
+        />
+      )}
+
+      {/* 3D FlipBook Diary Modal */}
+      {isDiaryFlipBookOpen && (
+        <DiaryFlipBook
+          isOpen={isDiaryFlipBookOpen}
+          entries={allDiaryEntries}
+          userName={savedUserName}
+          onClose={() => setIsDiaryFlipBookOpen(false)}
         />
       )}
     </>
