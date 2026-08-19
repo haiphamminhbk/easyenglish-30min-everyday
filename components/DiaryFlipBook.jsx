@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, forwardRef, useMemo } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 import FormattedNote from './FormattedNote';
 import { formatDatePretty } from '@/lib/tracker';
+import { playLofiMusic, pauseLofiMusic, toggleLofiMusic } from '@/lib/lofiMusic';
 
 const VIETNAMESE_DAYS = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
 
@@ -105,6 +106,7 @@ export default function DiaryFlipBook({ entries = [], userName = 'bạn', isOpen
   const flipBookRef = useRef(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [filterMode, setFilterMode] = useState('all'); // 'all' | 'study' | 'work'
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
 
   const filteredEntries = useMemo(() => {
     if (filterMode === 'study') {
@@ -115,6 +117,21 @@ export default function DiaryFlipBook({ entries = [], userName = 'bạn', isOpen
     }
     return entries;
   }, [entries, filterMode]);
+
+  // Handle Lo-fi background music auto-play on open and pause on close
+  useEffect(() => {
+    if (isOpen) {
+      playLofiMusic(0.25).then((started) => {
+        setIsMusicPlaying(started);
+      });
+    } else {
+      pauseLofiMusic();
+      setIsMusicPlaying(false);
+    }
+    return () => {
+      pauseLofiMusic();
+    };
+  }, [isOpen]);
 
   // Handle keydown for left/right page flip or Escape to close
   useEffect(() => {
@@ -171,6 +188,34 @@ export default function DiaryFlipBook({ entries = [], userName = 'bạn', isOpen
         }
       }}
     >
+      {/* Floating Lo-Fi Music Player Toggle */}
+      <button
+        type="button"
+        onClick={async (e) => {
+          e.stopPropagation();
+          const state = await toggleLofiMusic(0.25);
+          setIsMusicPlaying(state);
+        }}
+        className={`fixed top-4 left-4 sm:top-6 sm:left-6 px-3.5 py-2 rounded-full text-xs font-bold z-50 backdrop-blur-md transition-all shadow-xl flex items-center gap-2 border active:scale-95 ${
+          isMusicPlaying
+            ? 'bg-slate-900/85 text-emerald-300 border-emerald-500/40 hover:bg-slate-800'
+            : 'bg-slate-900/75 text-stone-300 border-white/15 hover:bg-slate-800'
+        }`}
+        title={isMusicPlaying ? 'Tạm dừng nhạc Lo-fi' : 'Bật nhạc Lo-fi chill'}
+      >
+        <span>{isMusicPlaying ? '🎧' : '🔇'}</span>
+        <span className="hidden sm:inline font-semibold">
+          {isMusicPlaying ? 'Nhạc Lo-fi Chill' : 'Nhạc Lo-fi: Tắt'}
+        </span>
+        {isMusicPlaying && (
+          <span className="flex items-center gap-0.5 h-3">
+            <span className="w-1 bg-emerald-400 rounded-full animate-bounce h-2" />
+            <span className="w-1 bg-emerald-400 rounded-full animate-bounce delay-100 h-3" />
+            <span className="w-1 bg-emerald-400 rounded-full animate-bounce delay-200 h-2" />
+          </span>
+        )}
+      </button>
+
       {/* Minimalist Frosted Close Button */}
       <button
         type="button"

@@ -25,6 +25,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import ModeToggle from '@/components/ModeToggle';
 import ConfettiEffect from '@/components/ConfettiEffect';
 import DiaryFlipBook from '@/components/DiaryFlipBook';
+import LofiPlayerWidget from '@/components/LofiPlayerWidget';
 
 export default function TrackerPage() {
   const router = useRouter();
@@ -344,6 +345,11 @@ export default function TrackerPage() {
               <span className="text-2xl">{isWork ? '💼' : '🌟'}</span>
             </div>
           </div>
+        </div>
+
+        {/* Relaxing Lo-Fi Ambient Music Player */}
+        <div className="mb-6">
+          <LofiPlayerWidget mode={mode} />
         </div>
 
         {/* Check-In Button */}
