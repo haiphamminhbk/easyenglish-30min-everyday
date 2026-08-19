@@ -232,12 +232,11 @@ export default function TrackerPage() {
 
         <header className="text-center mb-8">
           <h1
-            className={`text-3xl sm:text-4xl font-semibold tracking-normal mb-2 transition-colors duration-300 ${
+            className={`font-heading text-3xl sm:text-4xl font-bold tracking-tight mb-2 transition-colors duration-300 ${
               isWork
                 ? 'text-[#854d0e] dark:text-amber-300'
                 : 'text-[#2d5a8c] dark:text-indigo-300'
             }`}
-            style={{ fontFamily: 'Poppins, sans-serif', letterSpacing: '0.5px' }}
           >
             {isWork ? 'EASY WORKFLOW' : 'EASY ENGLISH'}
           </h1>
@@ -490,7 +489,7 @@ export default function TrackerPage() {
 
         {/* Footer */}
         <footer className="mt-12 text-center text-xs text-gray-600 dark:text-slate-400 flex flex-col items-center gap-3 pt-6 border-t border-gray-200 dark:border-slate-800">
-          <p className="text-sm font-semibold text-gray-700 dark:text-slate-200" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          <p className="font-heading text-sm font-semibold text-gray-700 dark:text-slate-200">
             {isWork
               ? 'Easy Workflow, achieve deep focus and high productivity!'
               : 'Easy English, learn English with ease!'}

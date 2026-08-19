@@ -18,7 +18,7 @@ export default function NoteModal({ isOpen, initialNote, mode = 'study', onClose
   return (
     <div className="fixed inset-0 bg-gray-900/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/90 rounded-2xl p-6 w-full max-w-xl shadow-2xl transform transition-all duration-200">
-        <h3 className="text-xl font-extrabold text-slate-900 dark:text-white mb-1.5 flex items-center gap-2">
+        <h3 className="font-heading text-xl font-bold text-slate-900 dark:text-white mb-1.5 flex items-center gap-2">
           <span>{isWork ? '💼' : '🎉'}</span>
           <span>{isWork ? 'Ghi chú công việc & nhiệm vụ hôm nay' : 'Ghi chú bài học hôm nay'}</span>
         </h3>

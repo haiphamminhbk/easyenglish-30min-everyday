@@ -1,5 +1,20 @@
 import './globals.css';
 import Background3D from '@/components/Background3D';
+import { Inter, Be_Vietnam_Pro } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin', 'vietnamese'],
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const beVietnamPro = Be_Vietnam_Pro({
+  subsets: ['latin', 'vietnamese'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  variable: '--font-heading',
+  display: 'swap',
+});
 
 export const metadata = {
   title: '⏰ Easy English - Mỗi ngày 30 phút',
@@ -27,7 +42,7 @@ export default function RootLayout({ children }) {
           }}
         />
       </head>
-      <body className="flex items-center justify-center min-h-screen p-4 sm:p-8 antialiased">
+      <body className={`${inter.variable} ${beVietnamPro.variable} font-sans flex items-center justify-center min-h-screen p-4 sm:p-8 antialiased`}>
         <Background3D />
         {children}
       </body>

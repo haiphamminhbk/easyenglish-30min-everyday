@@ -235,7 +235,7 @@ function ReviewContent() {
         >
           {isWork ? 'Công việc ngày' : 'Bài học ngày'}
         </div>
-        <h1 className="text-3xl font-extrabold text-gray-800 dark:text-slate-100 tracking-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
+        <h1 className="font-heading text-3xl font-bold text-gray-800 dark:text-slate-100 tracking-tight">
           {formatDatePretty(currentDate)}
         </h1>
         <p className="text-gray-500 dark:text-slate-400 text-xs mt-1">
@@ -355,7 +355,7 @@ function ReviewContent() {
 
       {/* Footer */}
       <footer className="mt-8 text-center text-xs text-gray-600 dark:text-slate-400 flex flex-col items-center gap-2 pt-6 border-t border-gray-200 dark:border-slate-800">
-        <p className="text-sm font-semibold text-gray-700 dark:text-slate-200" style={{ fontFamily: 'Poppins, sans-serif' }}>
+        <p className="font-heading text-sm font-semibold text-gray-700 dark:text-slate-200">
           {isWork
             ? 'Easy Workflow, achieve deep focus and high productivity!'
             : 'Easy English, learn English with ease!'}
