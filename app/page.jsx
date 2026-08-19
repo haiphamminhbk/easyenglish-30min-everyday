@@ -29,9 +29,33 @@ export default function TrackerPage() {
   const [isNameModalOpen, setIsNameModalOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [today, setToday] = useState('');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setGreeting(getTimeBasedGreeting());
+    const updateDateAndGreeting = () => {
+      const todayStr = getTodayString();
+      setToday(todayStr);
+      setGreeting(getTimeBasedGreeting());
+    };
+
+    updateDateAndGreeting();
+    setMounted(true);
+
+    const interval = setInterval(updateDateAndGreeting, 60000);
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        updateDateAndGreeting();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('focus', updateDateAndGreeting);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('focus', updateDateAndGreeting);
+    };
   }, []);
 
   useEffect(() => {
@@ -50,9 +74,9 @@ export default function TrackerPage() {
     });
   }, []);
 
-  const today = getTodayString();
-  const isCompletedToday = studyDates.includes(today);
-  const streak = calculateStreak(studyDates);
+  const activeToday = today || (mounted ? getTodayString() : '');
+  const isCompletedToday = Boolean(activeToday && studyDates.includes(activeToday));
+  const streak = calculateStreak(studyDates, activeToday || getTodayString());
 
   // Check-in action
   const handleCheckInClick = () => {
@@ -63,19 +87,20 @@ export default function TrackerPage() {
 
   // Confirming note on check-in or editing today
   const handleConfirmNote = async (newNoteText) => {
+    const currentToday = activeToday || getTodayString();
     const updatedNotes = { ...studyNotes };
     let updatedDates = [...studyDates];
 
-    if (!updatedDates.includes(today)) {
-      updatedDates.push(today);
+    if (!updatedDates.includes(currentToday)) {
+      updatedDates.push(currentToday);
       updatedDates.sort();
       setShowConfetti(true);
     }
 
     if (newNoteText && newNoteText.trim()) {
-      updatedNotes[today] = newNoteText.trim();
+      updatedNotes[currentToday] = newNoteText.trim();
     } else {
-      delete updatedNotes[today];
+      delete updatedNotes[currentToday];
     }
 
     setStudyDates(updatedDates);
@@ -106,8 +131,8 @@ export default function TrackerPage() {
     const { day, dateStr } = item;
     const isCompleted = studyDates.includes(dateStr);
     const hasNote = Boolean(studyNotes[dateStr] && studyNotes[dateStr].trim());
-    const isToday = dateStr === today;
-    const isPast = dateStr < today;
+    const isToday = Boolean(mounted && activeToday && dateStr === activeToday);
+    const isPast = Boolean(mounted && activeToday && dateStr < activeToday);
 
     let tooltip = formatDatePretty(dateStr);
     if (isCompleted) {
@@ -298,6 +323,7 @@ export default function TrackerPage() {
                 key={box.dateStr}
                 onClick={() => handleBoxClick(box)}
                 data-title={box.tooltip}
+                suppressHydrationWarning
                 className={`day-box ${box.isCompleted ? 'completed' : ''} ${
                   box.hasNote ? 'has-note' : ''
                 } ${box.isToday && !box.isCompleted ? 'today' : ''} ${

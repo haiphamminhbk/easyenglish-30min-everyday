@@ -6,13 +6,14 @@ export const NUMBER_OF_DAYS_TO_SHOW = 28;
 
 /**
  * Returns today's date formatted as YYYY-MM-DD
+ * @param {Date} [date]
  * @returns {string}
  */
-export function getTodayString() {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
+export function getTodayString(date = new Date()) {
+    const d = date instanceof Date ? date : new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
 }
 
@@ -24,22 +25,23 @@ export function getTodayString() {
 export function formatDatePretty(dateString) {
     if (!dateString || typeof dateString !== 'string') return '';
     const [year, month, day] = dateString.split('-');
+    if (!year || !month || !day) return dateString;
     return `${day}/${month}/${year}`;
 }
 
 /**
  * Calculates current consecutive streak count
  * @param {string[]} studyDates - Array of dates formatted as YYYY-MM-DD
+ * @param {string} [todayStr] - Current today date string
  * @returns {number}
  */
-export function calculateStreak(studyDates = []) {
+export function calculateStreak(studyDates = [], todayStr = getTodayString()) {
     if (!studyDates || studyDates.length === 0) return 0;
     
     let streak = 0;
-    const checkDate = new Date();
+    const [y, m, d] = (todayStr || getTodayString()).split('-').map(Number);
+    const checkDate = new Date(y, m - 1, d);
     checkDate.setHours(0, 0, 0, 0);
-    
-    const todayStr = getTodayString();
 
     if (studyDates.includes(todayStr)) {
         streak = 1;

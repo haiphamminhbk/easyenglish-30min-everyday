@@ -15,7 +15,9 @@ function ReviewContent() {
 
   const [studyDates, setStudyDates] = useState([]);
   const [studyNotes, setStudyNotes] = useState({});
-  const [currentDate, setCurrentDate] = useState(getTodayString());
+  const [currentDate, setCurrentDate] = useState('');
+  const [today, setToday] = useState('');
+  const [mounted, setMounted] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editNoteText, setEditNoteText] = useState('');
@@ -23,11 +25,15 @@ function ReviewContent() {
 
   // Sync date from URL search param ?date=YYYY-MM-DD
   useEffect(() => {
+    const todayStr = getTodayString();
+    setToday(todayStr);
+    setMounted(true);
+
     const dateParam = searchParams.get('date');
     if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
       setCurrentDate(dateParam);
     } else {
-      setCurrentDate(getTodayString());
+      setCurrentDate(todayStr);
     }
   }, [searchParams]);
 
@@ -43,10 +49,11 @@ function ReviewContent() {
     });
   }, []);
 
-  const today = getTodayString();
-  const isPastDate = currentDate < today;
-  const isCompleted = studyDates.includes(currentDate);
-  const rawNote = studyNotes[currentDate]?.trim() || '';
+  const activeToday = today || (mounted ? getTodayString() : '');
+  const activeDate = currentDate || activeToday;
+  const isPastDate = Boolean(mounted && activeToday && activeDate && activeDate < activeToday);
+  const isCompleted = studyDates.includes(activeDate);
+  const rawNote = studyNotes[activeDate]?.trim() || '';
 
   // Dates with notes for Prev/Next navigation
   const datesWithNotes = Object.keys(studyNotes)
