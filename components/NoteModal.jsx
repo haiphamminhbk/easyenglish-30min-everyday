@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import RichWordEditor from './RichWordEditor';
 
-export default function NoteModal({ isOpen, initialNote, onClose, onConfirm }) {
+export default function NoteModal({ isOpen, initialNote, mode = 'study', onClose, onConfirm }) {
   const [note, setNote] = useState('');
+  const isWork = mode === 'work';
 
   useEffect(() => {
     if (isOpen) {
@@ -18,17 +19,24 @@ export default function NoteModal({ isOpen, initialNote, onClose, onConfirm }) {
     <div className="fixed inset-0 bg-gray-900/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/90 rounded-2xl p-6 w-full max-w-xl shadow-2xl transform transition-all duration-200">
         <h3 className="text-xl font-extrabold text-slate-900 dark:text-white mb-1.5 flex items-center gap-2">
-          <span>🎉</span>
-          <span>Ghi chú bài học hôm nay</span>
+          <span>{isWork ? '💼' : '🎉'}</span>
+          <span>{isWork ? 'Ghi chú công việc & nhiệm vụ hôm nay' : 'Ghi chú bài học hôm nay'}</span>
         </h3>
         <p className="text-xs text-slate-600 dark:text-slate-300 mb-4 leading-relaxed">
-          Bạn đã học gì trong 30 phút qua? Sử dụng trình soạn thảo Word để định dạng và ghi chú từ vựng & cấu trúc.
+          {isWork
+            ? 'Bạn đã hoàn thành những gì trong 30 phút tập trung qua? Ghi lại danh sách nhiệm vụ, kết quả cuộc họp, sự kiện hoặc ghi chú bàn giao.'
+            : 'Bạn đã học gì trong 30 phút qua? Sử dụng trình soạn thảo để định dạng và ghi chú từ vựng, cấu trúc & ngữ pháp.'}
         </p>
 
         <RichWordEditor
           value={note}
           onChange={setNote}
-          placeholder="Ví dụ: Đã học 10 từ vựng chủ đề du lịch, luyện phát âm /θ/ và /ð/, làm bài tập thì hiện tại đơn..."
+          mode={mode}
+          placeholder={
+            isWork
+              ? 'Ví dụ: Đã hoàn thành báo cáo tuần, xử lý 5 ticket khách hàng, chốt kế hoạch dự án sprint mới...'
+              : 'Ví dụ: Đã học 10 từ vựng chủ đề du lịch, luyện phát âm /θ/ và /ð/, làm bài tập thì hiện tại đơn...'
+          }
           minHeight="220px"
         />
 
@@ -43,7 +51,11 @@ export default function NoteModal({ isOpen, initialNote, onClose, onConfirm }) {
           <button
             type="button"
             onClick={() => onConfirm(note)}
-            className="px-5 py-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 rounded-xl transition-all shadow-md active:scale-95"
+            className={`px-5 py-2 text-sm font-bold text-white rounded-xl transition-all shadow-md active:scale-95 ${
+              isWork
+                ? 'bg-amber-600 hover:bg-amber-700 dark:bg-amber-600 dark:hover:bg-amber-500 shadow-amber-500/20'
+                : 'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 shadow-indigo-500/20'
+            }`}
           >
             Xác nhận & Lưu
           </button>

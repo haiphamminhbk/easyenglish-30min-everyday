@@ -43,6 +43,13 @@ export function formatNoteToHtml(rawContent) {
     .replace(/\(-\)/g, '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-bold bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-200 border border-rose-300/80 dark:border-rose-700 mr-1">(-) Phủ định</span>')
     .replace(/\(\?\)/g, '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-bold bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-200 border border-blue-300/80 dark:border-blue-700 mr-1">(?) Nghi vấn</span>');
 
+  // Work Status Badges: [Hoàn thành], [Đang làm], [Chờ duyệt], [Khẩn cấp], [To-Do]
+  html = html
+    .replace(/\[Hoàn thành\]|\[Done\]/gi, '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 dark:bg-emerald-950/90 text-emerald-800 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-700 mr-1"><span>✔️</span><span>Hoàn thành</span></span>')
+    .replace(/\[Đang làm\]|\[In Progress\]/gi, '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 dark:bg-blue-950/90 text-blue-800 dark:text-blue-300 border border-blue-300/80 dark:border-blue-700 mr-1"><span>⚡</span><span>Đang làm</span></span>')
+    .replace(/\[Chờ duyệt\]|\[Pending\]/gi, '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 dark:bg-amber-950/90 text-amber-800 dark:text-amber-300 border border-amber-300/80 dark:border-amber-700 mr-1"><span>⏳</span><span>Chờ duyệt</span></span>')
+    .replace(/\[Khẩn cấp\]|\[Urgent\]/gi, '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 dark:bg-rose-950/90 text-rose-800 dark:text-rose-300 border border-rose-300/80 dark:border-rose-700 mr-1"><span>🔥</span><span>Khẩn cấp</span></span>');
+
   if (!isHtml) {
     const lines = html.split('\n');
     const formattedLines = lines.map((line) => {

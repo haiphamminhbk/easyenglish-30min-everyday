@@ -4,15 +4,23 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getTodayString, formatDatePretty } from '@/lib/tracker';
-import { initStorage, saveStudyData, loadLocalData } from '@/lib/storage';
+import {
+  initStorage,
+  saveStudyData,
+  loadLocalData,
+  getStoredMode,
+  setStoredMode,
+} from '@/lib/storage';
 import FormattedNote from '@/components/FormattedNote';
 import RichWordEditor from '@/components/RichWordEditor';
 import ThemeToggle from '@/components/ThemeToggle';
+import ModeToggle from '@/components/ModeToggle';
 
 function ReviewContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const [mode, setMode] = useState('study'); // 'study' | 'work'
   const [studyDates, setStudyDates] = useState([]);
   const [studyNotes, setStudyNotes] = useState({});
   const [currentDate, setCurrentDate] = useState('');
@@ -23,11 +31,18 @@ function ReviewContent() {
   const [editNoteText, setEditNoteText] = useState('');
   const [copied, setCopied] = useState(false);
 
-  // Sync date from URL search param ?date=YYYY-MM-DD
+  const isWork = mode === 'work';
+
+  // Sync mode and date from URL search param
   useEffect(() => {
     const todayStr = getTodayString();
     setToday(todayStr);
     setMounted(true);
+
+    const modeParam = searchParams.get('mode');
+    const activeMode = modeParam === 'work' ? 'work' : modeParam === 'study' ? 'study' : getStoredMode();
+    setMode(activeMode);
+    setStoredMode(activeMode);
 
     const dateParam = searchParams.get('date');
     if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
@@ -39,15 +54,34 @@ function ReviewContent() {
 
   // Load storage data
   useEffect(() => {
-    const initial = loadLocalData();
+    const currentMode = getStoredMode();
+    const initial = loadLocalData(currentMode);
     setStudyDates(initial.studyDates);
     setStudyNotes(initial.studyNotes);
 
     initStorage((data) => {
-      if (data.studyDates) setStudyDates(data.studyDates);
-      if (data.studyNotes) setStudyNotes(data.studyNotes);
+      const m = getStoredMode();
+      if (m === 'work') {
+        if (data.workDates) setStudyDates(data.workDates);
+        if (data.workNotes) setStudyNotes(data.workNotes);
+      } else {
+        if (data.studyDates) setStudyDates(data.studyDates);
+        if (data.studyNotes) setStudyNotes(data.studyNotes);
+      }
     });
   }, []);
+
+  const handleModeChange = (newMode) => {
+    setMode(newMode);
+    setStoredMode(newMode);
+
+    const loaded = loadLocalData(newMode);
+    setStudyDates(loaded.studyDates);
+    setStudyNotes(loaded.studyNotes);
+    setIsEditing(false);
+
+    router.push(`/review?date=${currentDate || today}&mode=${newMode}`);
+  };
 
   const activeToday = today || (mounted ? getTodayString() : '');
   const activeDate = currentDate || activeToday;
@@ -64,7 +98,7 @@ function ReviewContent() {
 
   const navigateToDate = (targetDate) => {
     setIsEditing(false);
-    router.push(`/review?date=${targetDate}`);
+    router.push(`/review?date=${targetDate}&mode=${mode}`);
   };
 
   const handlePrevLesson = () => {
@@ -111,7 +145,11 @@ function ReviewContent() {
   // Save edited note (Only permitted for today)
   const handleSaveEdit = async () => {
     if (isPastDate) {
-      alert('Không thể chỉnh sửa ghi chú của những ngày trước đó. Ghi chú chỉ dùng để ôn tập.');
+      alert(
+        isWork
+          ? 'Không thể chỉnh sửa ghi chú của những ngày trước đó. Ghi chú chỉ dùng để xem lại lịch sử.'
+          : 'Không thể chỉnh sửa ghi chú của những ngày trước đó. Ghi chú chỉ dùng để ôn tập.'
+      );
       setIsEditing(false);
       return;
     }
@@ -134,7 +172,7 @@ function ReviewContent() {
     setStudyDates(updatedDates);
     setIsEditing(false);
 
-    await saveStudyData(updatedDates, updatedNotes);
+    await saveStudyData(updatedDates, updatedNotes, mode);
   };
 
   return (
@@ -151,30 +189,51 @@ function ReviewContent() {
           <span>Quay lại Tracker</span>
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <div
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm border ${
               isCompleted
-                ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60'
+                ? isWork
+                  ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800/60'
+                  : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60'
                 : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 border-gray-200 dark:border-slate-700'
             }`}
           >
-            <span>{isCompleted ? '🌟 Đã học 30 phút' : '⏳ Chưa đánh dấu học'}</span>
+            <span>
+              {isCompleted
+                ? isWork
+                  ? '💼 Đã làm 30 phút'
+                  : '🌟 Đã học 30 phút'
+                : isWork
+                ? '⏳ Chưa đánh dấu làm'
+                : '⏳ Chưa đánh dấu học'}
+            </span>
           </div>
 
+          <ModeToggle mode={mode} onModeChange={handleModeChange} />
           <ThemeToggle />
         </div>
       </div>
 
       {/* Lesson Header */}
       <header className="text-center mb-6">
-        <div className="inline-block px-3 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold text-xs rounded-full uppercase tracking-wider mb-2 border border-indigo-100/60 dark:border-indigo-800/60">
-          Bài học ngày
+        <div
+          className={`inline-block px-3 py-1 font-bold text-xs rounded-full uppercase tracking-wider mb-2 border ${
+            isWork
+              ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-100/60 dark:border-amber-800/60'
+              : 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-100/60 dark:border-indigo-800/60'
+          }`}
+        >
+          {isWork ? 'Công việc ngày' : 'Bài học ngày'}
         </div>
         <h1 className="text-3xl font-extrabold text-gray-800 dark:text-slate-100 tracking-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
           {formatDatePretty(currentDate)}
         </h1>
-        <p className="text-gray-500 dark:text-slate-400 text-xs mt-1">Xem lại kiến thức và từ vựng bạn đã ghi chú</p>
+        <p className="text-gray-500 dark:text-slate-400 text-xs mt-1">
+          {isWork
+            ? 'Xem lại các nhiệm vụ, tiến độ và ghi chú công việc bạn đã hoàn thành'
+            : 'Xem lại kiến thức và từ vựng bạn đã ghi chú'}
+        </p>
       </header>
 
       {/* Lesson Note Card */}
@@ -211,7 +270,7 @@ function ReviewContent() {
               <svg className="w-3.5 h-3.5 text-gray-400 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              <span>Chỉ xem ôn tập</span>
+              <span>{isWork ? 'Chỉ xem lại công việc' : 'Chỉ xem ôn tập'}</span>
             </div>
           ) : !isEditing ? (
             <button
@@ -235,7 +294,7 @@ function ReviewContent() {
         {/* Note Content View / Edit Mode */}
         {isEditing ? (
           <div>
-            <RichWordEditor value={editNoteText} onChange={setEditNoteText} minHeight="260px" />
+            <RichWordEditor value={editNoteText} onChange={setEditNoteText} mode={mode} minHeight="260px" />
             <div className="mt-4 flex justify-end gap-2">
               <button
                 type="button"
@@ -247,7 +306,9 @@ function ReviewContent() {
               <button
                 type="button"
                 onClick={handleSaveEdit}
-                className="px-4 py-2 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-md"
+                className={`px-4 py-2 text-xs font-medium text-white rounded-lg transition-colors shadow-md ${
+                  isWork ? 'bg-amber-600 hover:bg-amber-700' : 'bg-indigo-600 hover:bg-indigo-700'
+                }`}
               >
                 Lưu thay đổi
               </button>
@@ -268,7 +329,7 @@ function ReviewContent() {
           disabled={currentIndex <= 0 && (!datesWithNotes.length || currentDate <= datesWithNotes[0])}
           className="flex-1 px-4 py-2.5 bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 font-semibold text-xs sm:text-sm rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1 border border-slate-200/60 dark:border-slate-700/60"
         >
-          ← Bài trước
+          {isWork ? '← Ngày trước' : '← Bài trước'}
         </button>
         <button
           type="button"
@@ -279,18 +340,24 @@ function ReviewContent() {
           }
           className="flex-1 px-4 py-2.5 bg-gray-200 dark:bg-slate-800 hover:bg-gray-300 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 font-semibold text-xs sm:text-sm rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1 border border-slate-200/60 dark:border-slate-700/60"
         >
-          Bài tiếp theo →
+          {isWork ? 'Ngày tiếp theo →' : 'Bài tiếp theo →'}
         </button>
       </div>
 
       {/* Footer */}
       <footer className="mt-8 text-center text-xs text-gray-600 dark:text-slate-400 flex flex-col items-center gap-2 pt-6 border-t border-gray-200 dark:border-slate-800">
         <p className="text-sm font-semibold text-gray-700 dark:text-slate-200" style={{ fontFamily: 'Poppins, sans-serif' }}>
-          Easy English, learn English with ease!
+          {isWork
+            ? 'Easy Workflow, achieve deep focus and high productivity!'
+            : 'Easy English, learn English with ease!'}
         </p>
         <a
           href="mailto:easyenglish.mrhai@gmail.com"
-          className="flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+          className={`flex items-center gap-1.5 text-xs transition-colors ${
+            isWork
+              ? 'text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300'
+              : 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300'
+          }`}
         >
           <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
             <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
@@ -310,3 +377,4 @@ export default function LessonReviewPage() {
     </Suspense>
   );
 }
+

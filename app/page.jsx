@@ -10,15 +10,24 @@ import {
   stripFormatting,
   getTimeBasedGreeting,
 } from '@/lib/tracker';
-import { initStorage, saveStudyData, saveUsername, loadLocalData } from '@/lib/storage';
+import {
+  initStorage,
+  saveStudyData,
+  saveUsername,
+  loadLocalData,
+  getStoredMode,
+  setStoredMode,
+} from '@/lib/storage';
 import NoteModal from '@/components/NoteModal';
 import NameModal from '@/components/NameModal';
 import ConfettiEffect from '@/components/ConfettiEffect';
 import ThemeToggle from '@/components/ThemeToggle';
+import ModeToggle from '@/components/ModeToggle';
 
 export default function TrackerPage() {
   const router = useRouter();
 
+  const [mode, setMode] = useState('study'); // 'study' | 'work'
   const [studyDates, setStudyDates] = useState([]);
   const [studyNotes, setStudyNotes] = useState({});
   const [savedUserName, setSavedUserName] = useState('bạn');
@@ -32,6 +41,8 @@ export default function TrackerPage() {
   const [today, setToday] = useState('');
   const [mounted, setMounted] = useState(false);
 
+  const isWork = mode === 'work';
+
   useEffect(() => {
     const updateDateAndGreeting = () => {
       const todayStr = getTodayString();
@@ -41,6 +52,9 @@ export default function TrackerPage() {
 
     updateDateAndGreeting();
     setMounted(true);
+
+    const savedMode = getStoredMode();
+    setMode(savedMode);
 
     const interval = setInterval(updateDateAndGreeting, 60000);
     const handleVisibility = () => {
@@ -60,7 +74,8 @@ export default function TrackerPage() {
 
   useEffect(() => {
     // Initial local load for instant paint
-    const initial = loadLocalData();
+    const savedMode = getStoredMode();
+    const initial = loadLocalData(savedMode);
     setStudyDates(initial.studyDates);
     setStudyNotes(initial.studyNotes);
     setSavedUserName(initial.savedUserName);
@@ -68,11 +83,27 @@ export default function TrackerPage() {
 
     // Sync with Firebase if available
     initStorage((data) => {
-      if (data.studyDates) setStudyDates(data.studyDates);
-      if (data.studyNotes) setStudyNotes(data.studyNotes);
+      const currentMode = getStoredMode();
+      if (currentMode === 'work') {
+        if (data.workDates) setStudyDates(data.workDates);
+        if (data.workNotes) setStudyNotes(data.workNotes);
+      } else {
+        if (data.studyDates) setStudyDates(data.studyDates);
+        if (data.studyNotes) setStudyNotes(data.studyNotes);
+      }
       if (data.savedUserName) setSavedUserName(data.savedUserName);
     });
   }, []);
+
+  // Mode change handler
+  const handleModeChange = (newMode) => {
+    setMode(newMode);
+    setStoredMode(newMode);
+
+    const loaded = loadLocalData(newMode);
+    setStudyDates(loaded.studyDates);
+    setStudyNotes(loaded.studyNotes);
+  };
 
   const activeToday = today || (mounted ? getTodayString() : '');
   const isCompletedToday = Boolean(activeToday && studyDates.includes(activeToday));
@@ -107,7 +138,7 @@ export default function TrackerPage() {
     setStudyNotes(updatedNotes);
     setIsNoteModalOpen(false);
 
-    await saveStudyData(updatedDates, updatedNotes);
+    await saveStudyData(updatedDates, updatedNotes, mode);
   };
 
   // Confirming name edit
@@ -136,15 +167,19 @@ export default function TrackerPage() {
 
     let tooltip = formatDatePretty(dateStr);
     if (isCompleted) {
-      tooltip += ' - Đã học: ';
+      tooltip += isWork ? ' - Đã làm: ' : ' - Đã học: ';
       if (hasNote) tooltip += `\n${stripFormatting(studyNotes[dateStr])}`;
-      if (isPast) tooltip += '\n(Nhấn để mở trang ôn tập bài học 📖)';
+      if (isPast) {
+        tooltip += isWork
+          ? '\n(Nhấn để mở trang xem lại công việc 📋)'
+          : '\n(Nhấn để mở trang ôn tập bài học 📖)';
+      }
     } else if (isToday) {
-      tooltip = 'Hôm nay - Cố lên nhé!';
+      tooltip = isWork ? 'Hôm nay - Tập trung hoàn thành công việc nhé!' : 'Hôm nay - Cố lên nhé!';
     } else if (isPast) {
-      tooltip += ' - Không học bài';
+      tooltip += isWork ? ' - Chưa hoàn thành công việc' : ' - Không học bài';
     } else {
-      tooltip += ' - Chưa học';
+      tooltip += isWork ? ' - Chưa làm' : ' - Chưa học';
     }
 
     return {
@@ -161,7 +196,7 @@ export default function TrackerPage() {
   const handleBoxClick = (box) => {
     if (box.isCompleted && box.isPast) {
       // Past completed days route strictly to read-only review
-      router.push(`/review?date=${box.dateStr}`);
+      router.push(`/review?date=${box.dateStr}&mode=${mode}`);
     } else if (box.isToday) {
       if (box.isCompleted) {
         setIsNoteModalOpen(true);
@@ -176,68 +211,116 @@ export default function TrackerPage() {
       {showConfetti && <ConfettiEffect onComplete={() => setShowConfetti(false)} />}
 
       <main className="glass-panel w-full max-w-lg p-6 sm:p-8 rounded-3xl relative z-10 mx-auto dark:text-slate-100 transition-colors duration-300">
-        {/* Top Header Bar with Theme Toggle & Time-Based Greeting */}
-        <div className="flex items-center justify-between mb-6 pb-3 border-b border-gray-100 dark:border-slate-800">
+        {/* Top Header Bar with Mode Toggle & Theme Toggle & Time-Based Greeting */}
+        <div className="flex items-center justify-between mb-6 pb-3 border-b border-gray-100 dark:border-slate-800 flex-wrap gap-2.5">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className={`w-2 h-2 rounded-full animate-pulse ${isWork ? 'bg-amber-500' : 'bg-emerald-500'}`} />
             <span className="text-xs font-bold tracking-wide text-slate-700 dark:text-slate-300">
               {greeting}
             </span>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <ModeToggle mode={mode} onModeChange={handleModeChange} />
+            <ThemeToggle />
+          </div>
         </div>
 
         <header className="text-center mb-8">
           <h1
-            className="text-3xl sm:text-4xl font-semibold tracking-normal mb-2 text-[#2d5a8c] dark:text-indigo-300"
+            className={`text-3xl sm:text-4xl font-semibold tracking-normal mb-2 transition-colors duration-300 ${
+              isWork
+                ? 'text-[#854d0e] dark:text-amber-300'
+                : 'text-[#2d5a8c] dark:text-indigo-300'
+            }`}
             style={{ fontFamily: 'Poppins, sans-serif', letterSpacing: '0.5px' }}
           >
-            EASY ENGLISH
+            {isWork ? 'EASY WORKFLOW' : 'EASY ENGLISH'}
           </h1>
-          <h2 className="text-lg font-semibold text-indigo-600 dark:text-indigo-400 mt-1 mb-3">
-            Mỗi ngày 30 phút – Tiến bộ từng bước một
+          <h2
+            className={`text-lg font-semibold mt-1 mb-3 transition-colors duration-300 ${
+              isWork
+                ? 'text-amber-600 dark:text-amber-400'
+                : 'text-indigo-600 dark:text-indigo-400'
+            }`}
+          >
+            {isWork
+              ? 'Mỗi ngày 30 phút – Tập trung cao độ & Hiệu suất'
+              : 'Mỗi ngày 30 phút – Tiến bộ từng bước một'}
           </h2>
 
           <p className="text-gray-600 dark:text-slate-300 mt-2 text-sm leading-relaxed">
-            Dành <strong className="text-gray-900 dark:text-white">30 phút</strong> mỗi ngày để nâng cao trình độ tiếng Anh. Hôm nay bạn đã hoàn thành mục tiêu chưa?
+            {isWork ? (
+              <>
+                Dành <strong className="text-gray-900 dark:text-white">30 phút tập trung</strong> mỗi ngày để xử lý công việc quan trọng. Hôm nay bạn đã hoàn thành mục tiêu chưa?
+              </>
+            ) : (
+              <>
+                Dành <strong className="text-gray-900 dark:text-white">30 phút</strong> mỗi ngày để nâng cao trình độ tiếng Anh. Hôm nay bạn đã hoàn thành mục tiêu chưa?
+              </>
+            )}
           </p>
 
           <blockquote className="text-left text-sm shadow-sm">
-            <p>“A journey of a thousand miles begins with a single step.”</p>
-            <p>Hành trình ngàn dặm bắt đầu bằng một bước đi.</p>
+            {isWork ? (
+              <>
+                <p>“Focus on being productive instead of busy.”</p>
+                <p>Tập trung vào hiệu suất và giá trị thay vì chỉ bận rộn.</p>
+              </>
+            ) : (
+              <>
+                <p>“A journey of a thousand miles begins with a single step.”</p>
+                <p>Hành trình ngàn dặm bắt đầu bằng một bước đi.</p>
+              </>
+            )}
           </blockquote>
 
           <p className="text-gray-500 dark:text-slate-400 mt-3 text-xs leading-relaxed italic px-2">
-            Đừng chờ đến khi có nhiều thời gian mới bắt đầu học. 30 phút mỗi ngày có thể không tạo ra sự thay đổi ngay lập tức, nhưng sự kiên trì mỗi ngày sẽ tạo nên khác biệt lớn theo thời gian.
+            {isWork
+              ? 'Đừng chờ đến khi có cả ngày rảnh rỗi mới bắt đầu làm. 30 phút tập trung giải quyết dứt điểm các đầu việc tồn đọng mỗi ngày sẽ tạo nên bước nhảy vọt trong sự nghiệp.'
+              : 'Đừng chờ đến khi có nhiều thời gian mới bắt đầu học. 30 phút mỗi ngày có thể không tạo ra sự thay đổi ngay lập tức, nhưng sự kiên trì mỗi ngày sẽ tạo nên khác biệt lớn theo thời gian.'}
           </p>
 
           <div className="mt-6 text-md font-semibold text-gray-700 dark:text-slate-300">
             Xin chào{' '}
             <span
               onClick={() => setIsNameModalOpen(true)}
-              className="text-indigo-600 dark:text-indigo-400 cursor-pointer hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors"
+              className={`cursor-pointer transition-colors ${
+                isWork
+                  ? 'text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300'
+                  : 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300'
+              }`}
               title="Nhấn để đổi tên"
             >
               {savedUserName === 'bạn' ? 'bạn ✏️' : savedUserName}
             </span>
-            ! Bạn đã kiên trì để đạt được:
+            ! Bạn đã kiên trì {isWork ? 'làm việc' : 'học tập'} để đạt được:
           </div>
         </header>
 
         {/* Stats */}
         <div className="flex justify-between gap-4 mb-8">
           <div className="flex-1 bg-white dark:bg-slate-800/90 rounded-2xl p-4 text-center border border-gray-100 dark:border-slate-700/80 shadow-sm transition-colors duration-300">
-            <p className="text-xs text-gray-400 dark:text-slate-400 font-semibold uppercase tracking-wider mb-1">Chuỗi ngày</p>
+            <p className="text-xs text-gray-400 dark:text-slate-400 font-semibold uppercase tracking-wider mb-1">
+              {isWork ? 'Chuỗi ngày làm' : 'Chuỗi ngày học'}
+            </p>
             <div className="text-3xl font-bold text-orange-500 dark:text-orange-400 flex items-center justify-center gap-1">
               <span>{streak}</span>
               <span className="text-2xl">🔥</span>
             </div>
           </div>
           <div className="flex-1 bg-white dark:bg-slate-800/90 rounded-2xl p-4 text-center border border-gray-100 dark:border-slate-700/80 shadow-sm transition-colors duration-300">
-            <p className="text-xs text-gray-400 dark:text-slate-400 font-semibold uppercase tracking-wider mb-1">Tổng số ngày</p>
-            <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 flex items-center justify-center gap-1">
+            <p className="text-xs text-gray-400 dark:text-slate-400 font-semibold uppercase tracking-wider mb-1">
+              {isWork ? 'Tổng số ngày làm' : 'Tổng số ngày học'}
+            </p>
+            <div
+              className={`text-3xl font-bold flex items-center justify-center gap-1 ${
+                isWork
+                  ? 'text-amber-600 dark:text-amber-400'
+                  : 'text-indigo-600 dark:text-indigo-400'
+              }`}
+            >
               <span>{studyDates.length}</span>
-              <span className="text-2xl">🌟</span>
+              <span className="text-2xl">{isWork ? '💼' : '🌟'}</span>
             </div>
           </div>
         </div>
@@ -250,10 +333,18 @@ export default function TrackerPage() {
           className={`w-full font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform shadow-lg text-lg mb-8 ${
             isCompletedToday
               ? 'bg-emerald-600 dark:bg-emerald-700 text-white cursor-not-allowed opacity-90'
+              : isWork
+              ? 'bg-amber-600 hover:bg-amber-700 dark:bg-amber-600 dark:hover:bg-amber-500 text-white hover:shadow-amber-500/30 active:scale-95 pulse-btn'
               : 'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white hover:shadow-indigo-500/30 active:scale-95 pulse-btn'
           }`}
         >
-          {isCompletedToday ? 'Đã hoàn thành mục tiêu hôm nay ✔️' : 'Hoàn thành 30 phút! 🚀'}
+          {isCompletedToday
+            ? isWork
+              ? 'Đã hoàn thành công việc hôm nay ✔️'
+              : 'Đã hoàn thành mục tiêu hôm nay ✔️'
+            : isWork
+            ? 'Hoàn thành 30 phút làm việc! 🚀'
+            : 'Hoàn thành 30 phút! 🚀'}
         </button>
 
         {/* Monthly Calendar Section */}
@@ -268,7 +359,11 @@ export default function TrackerPage() {
                 <button
                   type="button"
                   onClick={() => setCurrentMonthOffset(0)}
-                  className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-300 hover:text-indigo-700 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200/60 dark:border-indigo-800/60 px-2 py-0.5 rounded-md transition-colors"
+                  className={`text-[11px] font-semibold px-2 py-0.5 rounded-md transition-colors border ${
+                    isWork
+                      ? 'text-amber-600 dark:text-amber-300 hover:text-amber-700 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 border-amber-200/60 dark:border-amber-800/60'
+                      : 'text-indigo-600 dark:text-indigo-300 hover:text-indigo-700 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border-indigo-200/60 dark:border-indigo-800/60'
+                  }`}
                 >
                   Tháng này
                 </button>
@@ -285,7 +380,11 @@ export default function TrackerPage() {
           {/* Monthly Progress Bar */}
           <div className="w-full bg-gray-100 dark:bg-slate-700/80 rounded-full h-1.5 mb-4 overflow-hidden">
             <div
-              className="bg-gradient-to-r from-indigo-500 to-emerald-500 h-1.5 rounded-full transition-all duration-500"
+              className={`h-1.5 rounded-full transition-all duration-500 ${
+                isWork
+                  ? 'bg-gradient-to-r from-amber-500 to-emerald-500'
+                  : 'bg-gradient-to-r from-indigo-500 to-emerald-500'
+              }`}
               style={{
                 width: `${Math.round((completedInMonth / monthData.daysInMonth) * 100)}%`,
               }}
@@ -345,14 +444,20 @@ export default function TrackerPage() {
           <div className="flex items-center justify-center gap-4 mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/60 text-[11px] text-gray-500 dark:text-slate-400 flex-wrap">
             <span className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-md bg-emerald-500 shadow-2xs" />
-              <span>Đã học 30p</span>
+              <span>{isWork ? 'Đã làm việc 30p' : 'Đã học 30p'}</span>
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-white dark:border-slate-800 shadow-2xs" />
               <span>Có ghi chú</span>
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-md border-2 border-indigo-600 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-950/60" />
+              <span
+                className={`w-2.5 h-2.5 rounded-md border-2 ${
+                  isWork
+                    ? 'border-amber-600 dark:border-amber-400 bg-amber-50 dark:bg-amber-950/60'
+                    : 'border-indigo-600 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-950/60'
+                }`}
+              />
               <span>Hôm nay</span>
             </span>
           </div>
@@ -381,11 +486,17 @@ export default function TrackerPage() {
         {/* Footer */}
         <footer className="mt-12 text-center text-xs text-gray-600 dark:text-slate-400 flex flex-col items-center gap-3 pt-6 border-t border-gray-200 dark:border-slate-800">
           <p className="text-sm font-semibold text-gray-700 dark:text-slate-200" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Easy English, learn English with ease!
+            {isWork
+              ? 'Easy Workflow, achieve deep focus and high productivity!'
+              : 'Easy English, learn English with ease!'}
           </p>
           <a
             href="mailto:easyenglish.mrhai@gmail.com"
-            className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+            className={`flex items-center gap-2 transition-colors ${
+              isWork
+                ? 'text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300'
+                : 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300'
+            }`}
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
@@ -400,6 +511,7 @@ export default function TrackerPage() {
       <NoteModal
         isOpen={isNoteModalOpen}
         initialNote={studyNotes[today] || ''}
+        mode={mode}
         onClose={() => setIsNoteModalOpen(false)}
         onConfirm={handleConfirmNote}
       />

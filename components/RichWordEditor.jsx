@@ -10,9 +10,15 @@ import { useEffect } from 'react';
 export default function RichWordEditor({
   value,
   onChange,
-  placeholder = 'Nhập ghi chú bài học, từ vựng và cấu trúc...',
+  mode = 'study',
+  placeholder,
   minHeight = '220px',
 }) {
+  const isWork = mode === 'work';
+  const defaultPlaceholder = isWork
+    ? 'Nhập ghi chú công việc, nhiệm vụ đã hoàn thành, cuộc họp & sự kiện...'
+    : 'Nhập ghi chú bài học, từ vựng và cấu trúc...';
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -25,7 +31,7 @@ export default function RichWordEditor({
         multicolor: true,
       }),
       Placeholder.configure({
-        placeholder,
+        placeholder: placeholder || defaultPlaceholder,
       }),
     ],
     content: value || '',
@@ -72,8 +78,8 @@ export default function RichWordEditor({
       {/* Top Header & Counter */}
       <div className="flex items-center justify-between px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800/95 border-b border-gray-200 dark:border-slate-700 text-xs">
         <span className="font-bold text-gray-800 dark:text-slate-100 uppercase tracking-wide flex items-center gap-1.5">
-          <span>📝</span>
-          <span>Trình soạn thảo văn bản</span>
+          <span>{isWork ? '💼' : '📝'}</span>
+          <span>{isWork ? 'Trình soạn thảo công việc' : 'Trình soạn thảo bài học'}</span>
         </span>
         <span className="font-semibold text-gray-600 dark:text-slate-200 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 px-2.5 py-0.5 rounded-full shadow-2xs">
           {wordCount} từ • {charCount} ký tự
@@ -161,7 +167,7 @@ export default function RichWordEditor({
               ? 'bg-amber-400 text-amber-950 font-bold border-amber-400 shadow-xs'
               : 'bg-amber-100/70 dark:bg-amber-950/70 hover:bg-amber-200 dark:hover:bg-amber-900/80 text-amber-900 dark:text-amber-200 border-amber-300/80 dark:border-amber-700 font-semibold'
           }`}
-          title="Highlight từ vựng / cấu trúc"
+          title={isWork ? 'Highlight đầu việc / lưu ý' : 'Highlight từ vựng / cấu trúc'}
         >
           🖍️ Highlight
         </button>
@@ -236,67 +242,136 @@ export default function RichWordEditor({
 
         <div className="h-4 w-px bg-gray-300 dark:bg-slate-600 mx-1" />
 
-        {/* Quick English Templates */}
-        <button
-          type="button"
-          onClick={() =>
-            insertTemplate(
-              `<p><strong>📌 Từ vựng:</strong></p><ul><li><mark><strong>Word</strong></mark>: /phonetics/ - Nghĩa tiếng Việt (<em>Ví dụ: ...</em>)</li></ul>`
-            )
-          }
-          className="editor-btn px-2.5 py-1 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/80 text-indigo-700 dark:text-indigo-200 bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-700 font-semibold transition-colors shadow-2xs"
-          title="Chèn mẫu ghi chú từ vựng"
-        >
-          📖 Từ vựng
-        </button>
-        <button
-          type="button"
-          onClick={() =>
-            insertTemplate(
-              `<p><strong>💡 Cấu trúc câu:</strong></p><ul><li>Cấu trúc: <mark><strong>It takes + [sb] + [time] + to V</strong></mark> (Mất bao lâu để làm gì)</li><li>Viết lại: <mark><strong>S + spend + [time] + V-ing</strong></mark></li><li><em>Ví dụ: It takes me 30 minutes to study English every day.</em></li></ul>`
-            )
-          }
-          className="editor-btn px-2.5 py-1 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/80 text-emerald-800 dark:text-emerald-200 bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-300/80 dark:border-emerald-700 font-semibold transition-colors shadow-2xs"
-          title="Chèn mẫu cấu trúc câu tiếng Anh"
-        >
-          💡 Cấu trúc
-        </button>
-        <button
-          type="button"
-          onClick={() =>
-            insertTemplate(
-              `<p><strong>📘 Ngữ pháp: <mark>Tên chủ điểm</mark></strong></p><ul><li>Định nghĩa: ...</li><li>Cách dùng: ...</li><li><em>Ví dụ: ...</em></li></ul>`
-            )
-          }
-          className="editor-btn px-2.5 py-1 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/80 text-purple-800 dark:text-purple-200 bg-purple-50 dark:bg-purple-950/80 border border-purple-200 dark:border-purple-700 font-semibold transition-colors shadow-2xs"
-          title="Chèn mẫu chủ điểm ngữ pháp"
-        >
-          📘 Ngữ pháp
-        </button>
-        <button
-          type="button"
-          onClick={() =>
-            insertTemplate(
-              `<p><strong>⚡ Công thức: <mark>Thì hiện tại đơn (Present Simple)</mark></strong></p><ul><li><strong>(+) Khẳng định:</strong> S + V(s/es) + O</li><li><strong>(-) Phủ định:</strong> S + do/does not + V-inf + O</li><li><strong>(?) Nghi vấn:</strong> Do/Does + S + V-inf + O?</li><li>Dấu hiệu: always, usually, every day...</li><li><em>Ví dụ: I study English for 30 minutes every day.</em></li></ul>`
-            )
-          }
-          className="editor-btn px-2.5 py-1 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/80 text-blue-800 dark:text-blue-200 bg-blue-50 dark:bg-blue-950/80 border border-blue-200 dark:border-blue-700 font-semibold transition-colors shadow-2xs"
-          title="Chèn mẫu công thức thì"
-        >
-          ⚡ Công thức thì
-        </button>
-        <button
-          type="button"
-          onClick={() =>
-            insertTemplate(
-              `<p><strong>⚠️ Lưu ý ngữ pháp:</strong></p><ul><li>Không dùng: [Lỗi sai phổ biến]</li><li>Thay bằng: <mark><strong>[Cách dùng đúng]</strong></mark></li><li>Giải thích: ...</li></ul>`
-            )
-          }
-          className="editor-btn px-2.5 py-1 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/80 text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-700 font-semibold transition-colors shadow-2xs"
-          title="Chèn lưu ý ngữ pháp"
-        >
-          ⚠️ Lưu ý
-        </button>
+        {/* Quick Templates: Adaptive based on Mode */}
+        {!isWork ? (
+          /* STUDY MODE TEMPLATES */
+          <>
+            <button
+              type="button"
+              onClick={() =>
+                insertTemplate(
+                  `<p><strong>📌 Từ vựng:</strong></p><ul><li><mark><strong>Word</strong></mark>: /phonetics/ - Nghĩa tiếng Việt (<em>Ví dụ: ...</em>)</li></ul>`
+                )
+              }
+              className="editor-btn px-2.5 py-1 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/80 text-indigo-700 dark:text-indigo-200 bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-700 font-semibold transition-colors shadow-2xs"
+              title="Chèn mẫu ghi chú từ vựng"
+            >
+              📖 Từ vựng
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                insertTemplate(
+                  `<p><strong>💡 Cấu trúc câu:</strong></p><ul><li>Cấu trúc: <mark><strong>It takes + [sb] + [time] + to V</strong></mark> (Mất bao lâu để làm gì)</li><li>Viết lại: <mark><strong>S + spend + [time] + V-ing</strong></mark></li><li><em>Ví dụ: It takes me 30 minutes to study English every day.</em></li></ul>`
+                )
+              }
+              className="editor-btn px-2.5 py-1 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/80 text-emerald-800 dark:text-emerald-200 bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-300/80 dark:border-emerald-700 font-semibold transition-colors shadow-2xs"
+              title="Chèn mẫu cấu trúc câu tiếng Anh"
+            >
+              💡 Cấu trúc
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                insertTemplate(
+                  `<p><strong>📘 Ngữ pháp: <mark>Tên chủ điểm</mark></strong></p><ul><li>Định nghĩa: ...</li><li>Cách dùng: ...</li><li><em>Ví dụ: ...</em></li></ul>`
+                )
+              }
+              className="editor-btn px-2.5 py-1 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/80 text-purple-800 dark:text-purple-200 bg-purple-50 dark:bg-purple-950/80 border border-purple-200 dark:border-purple-700 font-semibold transition-colors shadow-2xs"
+              title="Chèn mẫu chủ điểm ngữ pháp"
+            >
+              📘 Ngữ pháp
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                insertTemplate(
+                  `<p><strong>⚡ Công thức: <mark>Thì hiện tại đơn (Present Simple)</mark></strong></p><ul><li><strong>(+) Khẳng định:</strong> S + V(s/es) + O</li><li><strong>(-) Phủ định:</strong> S + do/does not + V-inf + O</li><li><strong>(?) Nghi vấn:</strong> Do/Does + S + V-inf + O?</li><li>Dấu hiệu: always, usually, every day...</li><li><em>Ví dụ: I study English for 30 minutes every day.</em></li></ul>`
+                )
+              }
+              className="editor-btn px-2.5 py-1 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/80 text-blue-800 dark:text-blue-200 bg-blue-50 dark:bg-blue-950/80 border border-blue-200 dark:border-blue-700 font-semibold transition-colors shadow-2xs"
+              title="Chèn mẫu công thức thì"
+            >
+              ⚡ Công thức thì
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                insertTemplate(
+                  `<p><strong>⚠️ Lưu ý ngữ pháp:</strong></p><ul><li>Không dùng: [Lỗi sai phổ biến]</li><li>Thay bằng: <mark><strong>[Cách dùng đúng]</strong></mark></li><li>Giải thích: ...</li></ul>`
+                )
+              }
+              className="editor-btn px-2.5 py-1 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/80 text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-700 font-semibold transition-colors shadow-2xs"
+              title="Chèn lưu ý ngữ pháp"
+            >
+              ⚠️ Lưu ý
+            </button>
+          </>
+        ) : (
+          /* WORK / TASK MODE TEMPLATES */
+          <>
+            <button
+              type="button"
+              onClick={() =>
+                insertTemplate(
+                  `<p><strong>📌 Danh sách nhiệm vụ (To-Do List):</strong></p><ul><li><mark><strong>[Hoàn thành]</strong></mark> Xử lý báo cáo tuần & gửi email đối tác (100%)</li><li><mark><strong>[Đang làm]</strong></mark> Rà soát hợp đồng & tài liệu kỹ thuật</li><li><mark><strong>[Chờ duyệt]</strong></mark> Chuẩn bị slide thuyết trình cho cuộc họp</li></ul>`
+                )
+              }
+              className="editor-btn px-2.5 py-1 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/80 text-emerald-800 dark:text-emerald-200 bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-300/80 dark:border-emerald-700 font-semibold transition-colors shadow-2xs"
+              title="Chèn mẫu danh sách nhiệm vụ công việc"
+            >
+              📋 Nhiệm vụ
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                insertTemplate(
+                  `<p><strong>📅 Cuộc họp / Sự kiện: <mark>Tên cuộc họp hoặc sự kiện</mark></strong></p><ul><li><strong>Thời gian & Thành phần:</strong> 30 phút • Team Dự án / Khách hàng</li><li><strong>Nội dung thảo luận:</strong> Thống nhất yêu cầu & kế hoạch tuần tới</li><li><strong>Hành động tiếp theo (Action Items):</strong> Phân công nhiệm vụ cụ thể trước 17:00</li></ul>`
+                )
+              }
+              className="editor-btn px-2.5 py-1 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/80 text-indigo-700 dark:text-indigo-200 bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-700 font-semibold transition-colors shadow-2xs"
+              title="Chèn mẫu biên bản họp & sự kiện"
+            >
+              📅 Sự kiện & Họp
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                insertTemplate(
+                  `<p><strong>🎯 Mục tiêu 30 phút tập trung: <mark>Tên mục tiêu / Milestone</mark></strong></p><ul><li><strong>Mục tiêu:</strong> Giải quyết dứt điểm công việc trọng tâm</li><li><strong>Tiến độ đạt được:</strong> Hoàn thành 100% mục tiêu đề ra</li><li><strong>Đánh giá hiệu suất:</strong> ⭐⭐⭐⭐⭐ (Tập trung tối đa, không xao nhãng)</li></ul>`
+                )
+              }
+              className="editor-btn px-2.5 py-1 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/80 text-purple-800 dark:text-purple-200 bg-purple-50 dark:bg-purple-950/80 border border-purple-200 dark:border-purple-700 font-semibold transition-colors shadow-2xs"
+              title="Chèn mẫu mục tiêu & tiến độ"
+            >
+              🎯 Mục tiêu
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                insertTemplate(
+                  `<p><strong>⚡ Nhật ký công việc (Daily Log):</strong></p><ul><li><strong>09:00 - 09:30:</strong> Lên kế hoạch ngày và xử lý email ưu tiên</li><li><strong>14:00 - 14:30:</strong> Focus time - Giải quyết tồn đọng & rà soát dữ liệu</li><li><strong>Kết quả:</strong> Đúng hạn, chất lượng tốt, không có sự cố</li></ul>`
+                )
+              }
+              className="editor-btn px-2.5 py-1 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/80 text-blue-800 dark:text-blue-200 bg-blue-50 dark:bg-blue-950/80 border border-blue-200 dark:border-blue-700 font-semibold transition-colors shadow-2xs"
+              title="Chèn mẫu nhật ký làm việc"
+            >
+              ⚡ Nhật ký
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                insertTemplate(
+                  `<p><strong>⚠️ Rủi ro & Lưu ý khẩn cấp:</strong></p><ul><li><strong>Vấn đề (Blocker):</strong> <mark>Đang chờ phản hồi kỹ thuật / phê duyệt</mark></li><li><strong>Người phối hợp:</strong> Trưởng bộ phận liên quan</li><li><strong>Hạn chót (Deadline):</strong> Hôm nay 17:30</li></ul>`
+                )
+              }
+              className="editor-btn px-2.5 py-1 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/80 text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-700 font-semibold transition-colors shadow-2xs"
+              title="Chèn mẫu rủi ro & lưu ý khẩn"
+            >
+              ⚠️ Rủi ro / Lưu ý
+            </button>
+          </>
+        )}
       </div>
 
       {/* TipTap Editor Content */}
