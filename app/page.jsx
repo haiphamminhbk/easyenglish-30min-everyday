@@ -25,7 +25,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import ModeToggle from '@/components/ModeToggle';
 import ConfettiEffect from '@/components/ConfettiEffect';
 import DiaryFlipBook from '@/components/DiaryFlipBook';
-import LofiPlayerWidget from '@/components/LofiPlayerWidget';
+import SpotifyPlayerWidget from '@/components/SpotifyPlayerWidget';
 
 export default function TrackerPage() {
   const router = useRouter();
@@ -347,9 +347,9 @@ export default function TrackerPage() {
           </div>
         </div>
 
-        {/* Relaxing Lo-Fi Ambient Music Player */}
+        {/* Spotify Focus & Lo-Fi Music Player */}
         <div className="mb-6">
-          <LofiPlayerWidget mode={mode} />
+          <SpotifyPlayerWidget mode={mode} />
         </div>
 
         {/* Check-In Button */}
