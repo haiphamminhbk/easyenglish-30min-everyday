@@ -20,9 +20,9 @@ import {
 } from '@/lib/storage';
 import NoteModal from '@/components/NoteModal';
 import NameModal from '@/components/NameModal';
-import ConfettiEffect from '@/components/ConfettiEffect';
 import ThemeToggle from '@/components/ThemeToggle';
 import ModeToggle from '@/components/ModeToggle';
+import ConfettiEffect from '@/components/ConfettiEffect';
 
 export default function TrackerPage() {
   const router = useRouter();
@@ -36,7 +36,8 @@ export default function TrackerPage() {
 
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [isNameModalOpen, setIsNameModalOpen] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationStreak, setCelebrationStreak] = useState(1);
   const [isLoaded, setIsLoaded] = useState(false);
   const [today, setToday] = useState('');
   const [mounted, setMounted] = useState(false);
@@ -121,11 +122,11 @@ export default function TrackerPage() {
     const currentToday = activeToday || getTodayString();
     const updatedNotes = { ...studyNotes };
     let updatedDates = [...studyDates];
+    const isFirstTimeToday = !updatedDates.includes(currentToday);
 
-    if (!updatedDates.includes(currentToday)) {
+    if (isFirstTimeToday) {
       updatedDates.push(currentToday);
       updatedDates.sort();
-      setShowConfetti(true);
     }
 
     if (newNoteText && newNoteText.trim()) {
@@ -134,9 +135,15 @@ export default function TrackerPage() {
       delete updatedNotes[currentToday];
     }
 
+    const nextStreak = calculateStreak(updatedDates, currentToday);
     setStudyDates(updatedDates);
     setStudyNotes(updatedNotes);
     setIsNoteModalOpen(false);
+
+    if (isFirstTimeToday) {
+      setCelebrationStreak(nextStreak);
+      setShowCelebration(true);
+    }
 
     await saveStudyData(updatedDates, updatedNotes, mode);
   };
@@ -208,8 +215,6 @@ export default function TrackerPage() {
 
   return (
     <>
-      {showConfetti && <ConfettiEffect onComplete={() => setShowConfetti(false)} />}
-
       <main className="glass-panel w-full max-w-lg p-6 sm:p-8 rounded-3xl relative z-10 mx-auto dark:text-slate-100 transition-colors duration-300">
         {/* Top Header Bar with Mode Toggle & Theme Toggle & Time-Based Greeting */}
         <div className="flex items-center justify-between mb-6 pb-3 border-b border-gray-100 dark:border-slate-800 flex-wrap gap-2.5">
@@ -522,6 +527,14 @@ export default function TrackerPage() {
         onClose={() => setIsNameModalOpen(false)}
         onSave={handleSaveName}
       />
+
+      {showCelebration && (
+        <ConfettiEffect
+          mode={mode}
+          streak={celebrationStreak}
+          onComplete={() => setShowCelebration(false)}
+        />
+      )}
     </>
   );
 }

@@ -3,18 +3,18 @@
 import { useState, useEffect } from 'react';
 
 export default function ThemeToggle({ className = '' }) {
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState('dark');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Read stored theme or system preference
+    // Read stored theme - default to dark if not set or if set to 'dark'
     const stored = localStorage.getItem('english_theme');
-    if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      setTheme('dark');
-      document.documentElement.classList.add('dark');
-    } else {
+    if (stored === 'light') {
       setTheme('light');
       document.documentElement.classList.remove('dark');
+    } else {
+      setTheme('dark');
+      document.documentElement.classList.add('dark');
     }
     setMounted(true);
   }, []);

@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { getTodayString, formatDatePretty } from '@/lib/tracker';
+import { getTodayString, formatDatePretty, calculateStreak } from '@/lib/tracker';
 import {
   initStorage,
   saveStudyData,
@@ -15,6 +15,7 @@ import FormattedNote from '@/components/FormattedNote';
 import RichWordEditor from '@/components/RichWordEditor';
 import ThemeToggle from '@/components/ThemeToggle';
 import ModeToggle from '@/components/ModeToggle';
+import ConfettiEffect from '@/components/ConfettiEffect';
 
 function ReviewContent() {
   const router = useRouter();
@@ -30,6 +31,8 @@ function ReviewContent() {
   const [isEditing, setIsEditing] = useState(false);
   const [editNoteText, setEditNoteText] = useState('');
   const [copied, setCopied] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationStreak, setCelebrationStreak] = useState(1);
 
   const isWork = mode === 'work';
 
@@ -156,6 +159,7 @@ function ReviewContent() {
 
     const updatedNotes = { ...studyNotes };
     let updatedDates = [...studyDates];
+    const isFirstTimeToday = currentDate === activeToday && !studyDates.includes(currentDate) && Boolean(editNoteText.trim());
 
     const trimmed = editNoteText.trim();
     if (trimmed) {
@@ -171,6 +175,11 @@ function ReviewContent() {
     setStudyNotes(updatedNotes);
     setStudyDates(updatedDates);
     setIsEditing(false);
+
+    if (isFirstTimeToday) {
+      setCelebrationStreak(calculateStreak(updatedDates, activeToday));
+      setShowCelebration(true);
+    }
 
     await saveStudyData(updatedDates, updatedNotes, mode);
   };
@@ -366,6 +375,14 @@ function ReviewContent() {
           <span>easyenglish.mrhai@gmail.com</span>
         </a>
       </footer>
+
+      {showCelebration && (
+        <ConfettiEffect
+          mode={mode}
+          streak={celebrationStreak}
+          onComplete={() => setShowCelebration(false)}
+        />
+      )}
     </main>
   );
 }
