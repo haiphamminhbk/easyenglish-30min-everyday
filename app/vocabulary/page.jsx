@@ -76,6 +76,7 @@ import {
   toggleMasteredWord,
   toggleStarredWord,
   saveLastTopic,
+  initVocabStorage,
 } from '@/lib/vocabularyStorage';
 
 export default function VocabularyPage() {
@@ -93,7 +94,7 @@ export default function VocabularyPage() {
   const [quizHistory, setQuizHistory] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Initialize progress from localStorage
+  // Initialize progress from localStorage and sync with Cloud Firestore
   useEffect(() => {
     const saved = loadVocabProgress();
     setMasteredIds(saved.masteredIds);
@@ -103,6 +104,20 @@ export default function VocabularyPage() {
       setSelectedTopicId(saved.lastTopic);
     }
     setIsLoaded(true);
+
+    let unsub = () => {};
+    initVocabStorage((remote) => {
+      setMasteredIds(remote.masteredIds || []);
+      setStarredIds(remote.starredIds || []);
+      setQuizHistory(remote.quizHistory || []);
+      if (remote.lastTopic) {
+        setSelectedTopicId(remote.lastTopic);
+      }
+    }).then((cleanup) => {
+      if (typeof cleanup === 'function') unsub = cleanup;
+    });
+
+    return () => unsub();
   }, []);
 
   // Update last topic

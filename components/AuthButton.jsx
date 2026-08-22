@@ -80,6 +80,9 @@ export default function AuthButton() {
     try {
       await logoutUser();
       setIsDropdownOpen(false);
+      if (typeof window !== 'undefined') {
+        window.location.reload();
+      }
     } catch (err) {
       console.error(err);
     } finally {

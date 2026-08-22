@@ -27,7 +27,7 @@ export const viewport = {
 };
 
 export const metadata = {
-  title: '⏰ Easy English & Workflow - Mỗi ngày 30 phút',
+  title: 'Easy English & Workflow - Mỗi ngày 30 phút',
   description: 'Dành 30 phút mỗi ngày để nâng cao trình độ tiếng Anh & làm việc tập trung cao độ. Theo dõi chuỗi ngày học, 3000 từ vựng Oxford và bảng xếp hạng.',
   manifest: '/manifest.json',
   icons: {

@@ -1,4 +1,4 @@
-# ⏰ Easy English & Workflow Tracker (Next.js 14 App Router)
+# Easy English & Workflow Tracker (Next.js 14 App Router)
 
 A modern habit-tracking and productivity web application built with **Next.js 14 (App Router)**, **React.js**, **Tailwind CSS**, **Three.js**, and **Firebase Firestore** to track daily 30-minute English learning and deep work sessions.
 

@@ -9,13 +9,7 @@ import {
   ArrowLeft,
   Search,
   Sparkles,
-  Crown,
-  Share2,
-  Filter,
   Calendar,
-  Layers,
-  BookOpen,
-  HelpCircle,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -30,8 +24,8 @@ import {
   getUnifiedLeaderboard,
   subscribeLeaderboard,
   syncUserLeaderboardToFirestore,
-  TIERS,
 } from '@/lib/leaderboardService';
+import { subscribeToAuthState } from '@/lib/authService';
 
 const FlexCertificateModal = dynamic(
   () => import('@/components/leaderboard/FlexCertificateModal'),
@@ -40,34 +34,41 @@ const FlexCertificateModal = dynamic(
 
 export default function LeaderboardPage() {
   const [cloudLearners, setCloudLearners] = useState([]);
-  const [sortBy, setSortBy] = useState('xp'); // 'xp' | 'streak' | 'days' | 'vocab'
   const [timeFrame, setTimeFrame] = useState('all'); // 'all' | 'month' | 'week'
   const [searchQuery, setSearchQuery] = useState('');
   const [isCertificateOpen, setIsCertificateOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Sync current user stats to Firestore and subscribe to cloud updates
+  // Listen to auth changes and sync leaderboard to Firestore
   useEffect(() => {
+    const unsubAuth = subscribeToAuthState(({ user }) => {
+      if (user) {
+        syncUserLeaderboardToFirestore();
+        setRefreshKey((prev) => prev + 1);
+      }
+    });
+
     syncUserLeaderboardToFirestore();
 
-    const unsubscribe = subscribeLeaderboard((learners) => {
+    const unsubLeaderboard = subscribeLeaderboard((learners) => {
       setCloudLearners(learners);
       setIsLoaded(true);
     });
 
     setIsLoaded(true);
     return () => {
-      if (typeof unsubscribe === 'function') {
-        unsubscribe();
+      unsubAuth();
+      if (typeof unsubLeaderboard === 'function') {
+        unsubLeaderboard();
       }
     };
   }, [refreshKey]);
 
-  // Compute unified leaderboard
+  // Compute unified leaderboard with priority: Streak -> Total Days -> Diligence XP
   const unifiedList = useMemo(() => {
-    return getUnifiedLeaderboard(cloudLearners, sortBy, timeFrame);
-  }, [cloudLearners, sortBy, timeFrame, refreshKey]);
+    return getUnifiedLeaderboard(cloudLearners, timeFrame);
+  }, [cloudLearners, timeFrame, refreshKey]);
 
   // Current user's stats inside ranked list
   const currentUserStats = useMemo(() => {
@@ -93,6 +94,13 @@ export default function LeaderboardPage() {
   const handleQuestClaimed = () => {
     setRefreshKey((prev) => prev + 1);
   };
+
+  const [displayLimit, setDisplayLimit] = useState(50);
+
+  // Visible sliced list
+  const visibleList = useMemo(() => {
+    return filteredList.slice(0, displayLimit);
+  }, [filteredList, displayLimit]);
 
   return (
     <main className="w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-300">
@@ -152,122 +160,105 @@ export default function LeaderboardPage() {
       {/* Top 3 Podium */}
       <PodiumTop3 topLearners={top3Learners} />
 
-      {/* Controls & Filter Section */}
+      {/* Categories & Search Controls */}
       <div className="bg-white/80 dark:bg-slate-800/80 rounded-3xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-700/80 shadow-md backdrop-blur-md mb-6">
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-          {/* Sorting Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 md:pb-0">
+          {/* Category Tabs: Toàn bộ | Tháng này | Tuần này */}
+          <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-700/60 rounded-2xl">
             <button
               type="button"
-              onClick={() => setSortBy('xp')}
-              className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-extrabold transition-all whitespace-nowrap ${
-                sortBy === 'xp'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25 ring-2 ring-indigo-400/40'
-                  : 'bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              onClick={() => setTimeFrame('all')}
+              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all ${
+                timeFrame === 'all'
+                  ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-500/25 ring-2 ring-indigo-400/40'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-600/50'
               }`}
             >
-              <Zap className="w-3.5 h-3.5 fill-current" />
-              <span>Điểm Chăm Chỉ (XP)</span>
+              <Trophy className="w-4 h-4" />
+              <span>Toàn bộ</span>
             </button>
 
             <button
               type="button"
-              onClick={() => setSortBy('streak')}
-              className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-extrabold transition-all whitespace-nowrap ${
-                sortBy === 'streak'
-                  ? 'bg-orange-500 text-white shadow-md shadow-orange-500/25 ring-2 ring-orange-400/40'
-                  : 'bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              onClick={() => setTimeFrame('month')}
+              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all ${
+                timeFrame === 'month'
+                  ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-500/25 ring-2 ring-indigo-400/40'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-600/50'
               }`}
             >
-              <Flame className="w-3.5 h-3.5 fill-current" />
-              <span>Chuỗi Ngày (Streak)</span>
+              <Calendar className="w-4 h-4" />
+              <span>Tháng này</span>
             </button>
 
             <button
               type="button"
-              onClick={() => setSortBy('days')}
-              className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-extrabold transition-all whitespace-nowrap ${
-                sortBy === 'days'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/25 ring-2 ring-emerald-400/40'
-                  : 'bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              onClick={() => setTimeFrame('week')}
+              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-all ${
+                timeFrame === 'week'
+                  ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-500/25 ring-2 ring-indigo-400/40'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-600/50'
               }`}
             >
-              <Calendar className="w-3.5 h-3.5" />
-              <span>Tổng Ngày Học</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setSortBy('vocab')}
-              className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs sm:text-sm font-extrabold transition-all whitespace-nowrap ${
-                sortBy === 'vocab'
-                  ? 'bg-purple-600 text-white shadow-md shadow-purple-500/25 ring-2 ring-purple-400/40'
-                  : 'bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-              }`}
-            >
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>Từ Vựng Đã Thuộc</span>
+              <Flame className="w-4 h-4 fill-current" />
+              <span>Tuần này</span>
             </button>
           </div>
 
-          {/* Timeframe & Search Bar */}
-          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-            {/* Timeframe Switcher */}
-            <div className="flex items-center bg-slate-100 dark:bg-slate-700/60 p-1 rounded-2xl text-xs font-bold flex-shrink-0">
+          {/* Search Bar */}
+          <div className="relative flex-1 sm:max-w-xs">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Tìm theo tên học viên hoặc địa điểm..."
+              className="w-full pl-9 pr-4 py-2.5 text-xs sm:text-sm rounded-2xl bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-indigo-400 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition-all placeholder:text-slate-400"
+            />
+            {searchQuery && (
               <button
                 type="button"
-                onClick={() => setTimeFrame('all')}
-                className={`px-2.5 py-1.5 rounded-xl transition-all ${
-                  timeFrame === 'all'
-                    ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-300 shadow-2xs'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-                }`}
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs px-1"
               >
-                Toàn bộ
+                ✕
               </button>
-              <button
-                type="button"
-                onClick={() => setTimeFrame('month')}
-                className={`px-2.5 py-1.5 rounded-xl transition-all ${
-                  timeFrame === 'month'
-                    ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-300 shadow-2xs'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-                }`}
-              >
-                Tháng này
-              </button>
-              <button
-                type="button"
-                onClick={() => setTimeFrame('week')}
-                className={`px-2.5 py-1.5 rounded-xl transition-all ${
-                  timeFrame === 'week'
-                    ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-300 shadow-2xs'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-                }`}
-              >
-                Tuần này
-              </button>
-            </div>
+            )}
+          </div>
+        </div>
 
-            {/* Search Input */}
-            <div className="relative flex-1 sm:w-48">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Tìm học viên..."
-                className="w-full pl-8 pr-3 py-1.5 text-xs rounded-2xl bg-slate-100 dark:bg-slate-700/60 border border-transparent focus:border-indigo-400 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition-all"
-              />
-            </div>
+        {/* Priority & Live Count Badge */}
+        <div className="mt-3.5 pt-3 border-t border-slate-100 dark:border-slate-750/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 flex-wrap">
+            <span className="font-semibold text-slate-600 dark:text-slate-300">Thứ tự xếp hạng:</span>
+            <span className="inline-flex items-center gap-1 font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 px-2 py-0.5 rounded-lg border border-orange-200/50 dark:border-orange-800/50">
+              <Flame className="w-3 h-3 fill-orange-500" /> 1. Chuỗi ngày
+            </span>
+            <span className="text-slate-400">➔</span>
+            <span className="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-lg border border-emerald-200/50 dark:border-emerald-800/50">
+              <Calendar className="w-3 h-3" /> 2. Tổng ngày
+            </span>
+            <span className="text-slate-400">➔</span>
+            <span className="inline-flex items-center gap-1 font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-lg border border-indigo-200/50 dark:border-indigo-800/50">
+              <Zap className="w-3 h-3 fill-indigo-500" /> 3. XP Chăm chỉ
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 self-end sm:self-center">
+            <span className="text-slate-500 dark:text-slate-400">
+              Hiển thị <strong className="text-indigo-600 dark:text-indigo-400 font-bold">{visibleList.length}</strong> / {filteredList.length}
+            </span>
+            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-lg">
+              ● Realtime
+            </span>
           </div>
         </div>
       </div>
 
       {/* Leaderboard Learners List */}
-      <div className="space-y-2.5 mb-12">
-        {filteredList.length > 0 ? (
-          filteredList.map((learner) => (
+      <div className="space-y-2.5 mb-8">
+        {visibleList.length > 0 ? (
+          visibleList.map((learner) => (
             <LeaderboardRow
               key={learner.id || learner.userId}
               learner={learner}
@@ -282,6 +273,26 @@ export default function LeaderboardPage() {
           </div>
         )}
       </div>
+
+      {/* Load More Button */}
+      {filteredList.length > visibleList.length && (
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mb-12 animate-fadeIn">
+          <button
+            type="button"
+            onClick={() => setDisplayLimit((prev) => prev + 25)}
+            className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-white/90 dark:bg-slate-800/90 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-extrabold border border-slate-200/80 dark:border-slate-700/80 shadow-md active:scale-95 transition-all"
+          >
+            <span>Xem thêm 25 học viên nữa...</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setDisplayLimit(filteredList.length)}
+            className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-extrabold shadow-md shadow-indigo-500/25 active:scale-95 transition-all"
+          >
+            <span>Hiển thị tất cả ({filteredList.length} học viên)</span>
+          </button>
+        </div>
+      )}
 
       {/* Professional Tier Progression Roadmap & Scoring Breakdown Section */}
       <TierRoadmapSection currentUserStats={currentUserStats} />

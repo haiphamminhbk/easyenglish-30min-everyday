@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Sparkles, RotateCcw, Timer, Trophy, CheckCircle2, Volume2 } from 'lucide-react';
+import { Sparkles, RotateCcw, Trophy, CheckCircle2, Volume2 } from 'lucide-react';
 import { speakWord } from '@/lib/vocabularyStorage';
 
 export default function MatchingGame({ words = [], onToggleMastered }) {
@@ -118,8 +118,8 @@ export default function MatchingGame({ words = [], onToggleMastered }) {
       <div className="flex items-center justify-between mb-4 px-2">
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 shadow-sm">
-            <Timer className="w-3.5 h-3.5 text-indigo-500" />
-            {formatTime(timerSeconds)}
+            <span>Thời gian:</span>
+            <span className="font-extrabold text-slate-900 dark:text-white">{formatTime(timerSeconds)}</span>
           </span>
 
           <span className="px-3 py-1.5 bg-white/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 shadow-sm">

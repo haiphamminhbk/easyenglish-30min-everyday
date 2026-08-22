@@ -27,7 +27,7 @@ const TOPICS = [
   { id: 'health', name: 'Sức khỏe & Bệnh tật', enName: 'Health & Illness', icon: '🩺', color: 'red' },
   { id: 'vegetables', name: 'Rau củ quả', enName: 'Vegetables & Herbs', icon: '🥦', color: 'green' },
   { id: 'transport', name: 'Phương tiện giao thông', enName: 'Transport & Traffic', icon: '🚗', color: 'orange' },
-  { id: 'time', name: 'Thời gian & Niên đại', enName: 'Time & Chronology', icon: '⏰', color: 'violet' },
+  { id: 'time', name: 'Thời gian & Niên đại', enName: 'Time & Chronology', icon: '🗓️', color: 'sky' },
   { id: 'emotions', name: 'Cảm xúc & Tâm trạng', enName: 'Emotions & Moods', icon: '😊', color: 'pink' },
   { id: 'character', name: 'Tính cách & Phẩm chất', enName: 'Personality & Character', icon: '🧠', color: 'indigo' },
   { id: 'drinks', name: 'Đồ uống & Thức uống', enName: 'Drinks & Beverages', icon: '🍹', color: 'amber' },
