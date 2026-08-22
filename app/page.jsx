@@ -21,6 +21,7 @@ import {
   setStoredMode,
   loadAllDiaryEntries,
 } from '@/lib/storage';
+import { syncUserLeaderboardToFirestore } from '@/lib/leaderboardService';
 import ThemeToggle from '@/components/ThemeToggle';
 import ModeToggle from '@/components/ModeToggle';
 import AuthButton from '@/components/AuthButton';
@@ -155,6 +156,7 @@ export default function TrackerPage() {
     }
 
     await saveStudyData(updatedDates, updatedNotes, mode);
+    syncUserLeaderboardToFirestore();
   };
 
   // Confirming name edit
@@ -162,6 +164,7 @@ export default function TrackerPage() {
     setSavedUserName(newName);
     setIsNameModalOpen(false);
     await saveUsername(newName);
+    syncUserLeaderboardToFirestore();
   };
 
   // Month data for current month offset (memoized)
@@ -250,15 +253,25 @@ export default function TrackerPage() {
 
         <header className="text-center mb-8">
           {!isWork && (
-            <div className="flex justify-center mb-3.5 animate-fadeIn">
+            <div className="flex justify-center items-center gap-2.5 mb-4 flex-wrap animate-fadeIn">
               <Link
                 href="/vocabulary"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-xs sm:text-sm font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 active:scale-95 transition-all ring-2 ring-indigo-400/30 group"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white shadow-md shadow-indigo-500/20 active:scale-95 transition-all ring-2 ring-indigo-400/30 group"
                 title="Học 3000 từ vựng Oxford theo 60 chủ đề & Flashcards 3D"
               >
-                <span className="text-base group-hover:scale-110 transition-transform">🎴</span>
-                <span>Học từ vựng Oxford 3000</span>
-                <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-bold">60 Chủ đề</span>
+                <span className="text-sm group-hover:scale-110 transition-transform">🎴</span>
+                <span>Từ vựng Oxford</span>
+                <span className="text-[9px] bg-white/20 px-1.5 py-0.5 rounded-full font-bold">60 Chủ đề</span>
+              </Link>
+
+              <Link
+                href="/leaderboard"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-extrabold bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-500 text-amber-950 shadow-md shadow-amber-500/20 active:scale-95 transition-all ring-2 ring-amber-400/40 group"
+                title="Xem Bảng Xếp Hạng học viên chăm chỉ & thi đua chuỗi ngày"
+              >
+                <span className="text-sm group-hover:scale-120 transition-transform animate-bounce">🏆</span>
+                <span>Bảng Xếp Hạng</span>
+                <span className="text-[9px] bg-amber-900/15 px-1.5 py-0.5 rounded-full font-black">Top XP</span>
               </Link>
             </div>
           )}

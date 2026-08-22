@@ -199,7 +199,7 @@ export default function AuthButton() {
                 Đăng Nhập Easy English
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
-                Lưu giữ tiến độ học tiếng Anh của bạn an toàn trên đám mây và đồng bộ đa thiết bị.
+                Lưu giữ tiến độ học tiếng Anh của bạn.
               </p>
             </div>
 
@@ -234,10 +234,6 @@ export default function AuthButton() {
               <div className="flex items-center gap-2.5 text-slate-700 dark:text-slate-300">
                 <Smartphone className="w-4 h-4 text-indigo-500 flex-shrink-0" />
                 <span>Học trên Máy tính & Điện thoại cùng 1 tiến độ.</span>
-              </div>
-              <div className="flex items-center gap-2.5 text-slate-700 dark:text-slate-300">
-                <ShieldCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                <span>Không sợ mất chuỗi ngày khi xóa cache trình duyệt.</span>
               </div>
               <div className="flex items-center gap-2.5 text-slate-700 dark:text-slate-300">
                 <Trophy className="w-4 h-4 text-amber-500 flex-shrink-0" />

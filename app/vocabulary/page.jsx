@@ -176,7 +176,7 @@ export default function VocabularyPage() {
         {/* Top Header Navigation */}
         <header className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 p-4 sm:p-5 rounded-3xl bg-white/75 dark:bg-slate-900/75 border border-white/60 dark:border-slate-800 backdrop-blur-xl shadow-lg">
           {/* Brand & Back Button */}
-          <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="flex items-center gap-2.5 w-full sm:w-auto flex-wrap">
             <Link
               href="/"
               className="p-2.5 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-200 transition-all flex items-center gap-2 text-xs font-bold shadow-sm"
@@ -184,6 +184,15 @@ export default function VocabularyPage() {
             >
               <ArrowLeft className="w-4 h-4" />
               <span className="hidden sm:inline">Theo dõi</span>
+            </Link>
+
+            <Link
+              href="/leaderboard"
+              className="p-2.5 rounded-2xl bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200/80 dark:border-amber-700/80 text-amber-700 dark:text-amber-300 transition-all flex items-center gap-1.5 text-xs font-black shadow-sm group"
+              title="Xem Bảng Xếp Hạng học viên chăm chỉ"
+            >
+              <span className="text-sm group-hover:scale-120 transition-transform animate-bounce">🏆</span>
+              <span className="hidden sm:inline">Bảng Xếp Hạng</span>
             </Link>
 
             <div>

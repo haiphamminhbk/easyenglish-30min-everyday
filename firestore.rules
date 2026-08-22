@@ -1,0 +1,208 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users
+// Document ID: {userId} (equals request.auth.uid)
+// Fields:
+//   - uid: string (required) - Firebase Auth User UID
+//   - displayName: string (optional) - User's full name or nickname
+//   - email: string (optional) - User's email
+//   - photoURL: string (optional) - Profile picture URL
+//   - isAnonymous: bool (optional) - Guest account flag
+//   - createdAt: timestamp (optional) - Account creation timestamp
+//   - lastLoginAt: timestamp (optional) - Last activity timestamp
+//   - preferences: map (optional) - UI and app preferences
+//
+// Subcollection: users/{userId}/data
+// Document ID: 'tracker' | 'vocabulary' | string
+// Fields:
+//   - (tracker) dates: list (optional) - Array of completed study dates (YYYY-MM-DD)
+//   - (tracker) notes: map (optional) - Map of date -> HTML note
+//   - (tracker) workDates: list (optional) - Array of work dates
+//   - (tracker) workNotes: map (optional) - Map of date -> work note
+//   - (vocabulary) masteredIds: list (optional) - Mastered word IDs
+//   - (vocabulary) starredIds: list (optional) - Starred word IDs
+//   - (vocabulary) lastTopic: string (optional) - Active category
+//   - (vocabulary) quizHistory: list (optional) - Recent quiz results
+//   - updatedAt: string | timestamp (optional)
+//
+// Subcollection: users/{userId}/checkins
+// Document ID: {dateStr} (format: YYYY-MM-DD)
+// Fields:
+//   - date: string (required) - Format YYYY-MM-DD
+//   - studyCompleted: bool (optional)
+//   - workCompleted: bool (optional)
+//   - studyNote: string (optional)
+//   - workNote: string (optional)
+//   - studyMinutes: number (optional)
+//   - workMinutes: number (optional)
+//   - tags: list (optional)
+//   - updatedAt: timestamp | string (optional)
+//
+// Subcollection: users/{userId}/custom_words
+// Document ID: {wordId}
+// Fields:
+//   - id: string (required)
+//   - word: string (required, 1-100 chars)
+//   - phonetic: string (optional)
+//   - partOfSpeech: string (optional)
+//   - vietnamese: string (required, 1-300 chars)
+//   - definition: string (optional)
+//   - example: string (optional)
+//   - exampleVi: string (optional)
+//   - topicId: string (optional)
+//   - level: string (optional)
+//   - isMastered: bool (optional)
+//   - isStarred: bool (optional)
+//   - createdAt: timestamp | string (optional)
+//   - updatedAt: timestamp | string (optional)
+//
+// Subcollection: users/{userId}/quiz_history
+// Document ID: {sessionId}
+// Fields:
+//   - id: string (required)
+//   - topicId: string (optional)
+//   - mode: string (optional) - quiz, spelling, matching, flashcards
+//   - level: string (optional)
+//   - score: number (required, >= 0)
+//   - totalQuestions: number (required, > 0)
+//   - accuracyPercent: number (optional)
+//   - timeSpentSeconds: number (optional)
+//   - wrongWordIds: list (optional)
+//   - createdAt: timestamp | string (optional)
+//
+// Collection: topics
+// Document ID: {topicId}
+// Description: Global curated vocabulary topic metadata (Read-only from client)
+//
+// Collection: vocabulary
+// Document ID: {wordId}
+// Description: Global Oxford 3000 vocabulary database (Read-only from client)
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function uidUnchanged() {
+      return !('uid' in request.resource.data) ||
+        request.resource.data.uid == request.auth.uid;
+    }
+
+    function uidNotModified() {
+      return !('uid' in request.resource.data) ||
+        request.resource.data.uid == resource.data.uid;
+    }
+
+    function isValidOptionalString(data, field, minLen, maxLen) {
+      return !(field in data) ||
+             (data[field] is string &&
+              data[field].size() >= minLen &&
+              data[field].size() <= maxLen);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUserProfile(data, userId) {
+      return (!('uid' in data) || data.uid == userId) &&
+             isValidOptionalString(data, 'displayName', 0, 100) &&
+             isValidOptionalString(data, 'email', 0, 200) &&
+             isValidOptionalString(data, 'photoURL', 0, 1000);
+    }
+
+    function isValidCustomWord(data) {
+      return ('word' in data && data.word is string && data.word.size() > 0 && data.word.size() <= 100) &&
+             ('vietnamese' in data && data.vietnamese is string && data.vietnamese.size() > 0 && data.vietnamese.size() <= 300) &&
+             isValidOptionalString(data, 'phonetic', 0, 100) &&
+             isValidOptionalString(data, 'definition', 0, 1000) &&
+             isValidOptionalString(data, 'example', 0, 1000) &&
+             isValidOptionalString(data, 'exampleVi', 0, 1000);
+    }
+
+    function isValidQuizSession(data) {
+      return ('score' in data && data.score is number && data.score >= 0) &&
+             ('totalQuestions' in data && data.totalQuestions is number && data.totalQuestions > 0);
+    }
+
+    // ===============================================================
+    // User Root Collection & Subcollections
+    // ===============================================================
+
+    match /users/{userId} {
+      // User Profile
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUserProfile(request.resource.data, userId);
+      allow update: if isOwner(userId) && uidNotModified() && isValidUserProfile(request.resource.data, userId);
+      allow delete: if isOwner(userId);
+
+      // Aggregated summary data (tracker, vocabulary, settings)
+      match /data/{docId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Detailed daily check-ins
+      match /checkins/{dateStr} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Personalized vocabulary flashcards
+      match /custom_words/{wordId} {
+        allow read, delete: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidCustomWord(request.resource.data);
+        allow update: if isOwner(userId) && isValidCustomWord(request.resource.data);
+      }
+
+      // Quiz and learning history sessions
+      match /quiz_history/{sessionId} {
+        allow read, delete: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidQuizSession(request.resource.data);
+        allow update: if isOwner(userId) && isValidQuizSession(request.resource.data);
+      }
+
+      // Dictation practice sessions
+      match /dictation_sessions/{sessionId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // ===============================================================
+    // Public Read-Only System Collections (Topics & Oxford 3000 Words)
+    // ===============================================================
+
+    match /topics/{topicId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /vocabulary/{wordId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ===============================================================
+    // Global Leaderboard (Public Read, Owner Write)
+    // ===============================================================
+
+    match /leaderboard/{userId} {
+      allow read: if true;
+      allow create, update: if isAuthenticated() && request.auth.uid == userId;
+      allow delete: if isAuthenticated() && request.auth.uid == userId;
+    }
+  }
+}
