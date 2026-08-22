@@ -163,21 +163,14 @@ export default function VocabularyPage() {
             </div>
           </div>
 
-          {/* Quick Stats Pill & Review Link */}
-          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-end">
+          {/* Quick Stats Pill */}
+          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
             <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/80 dark:border-indigo-800/60 text-xs font-bold text-indigo-700 dark:text-indigo-300 shadow-sm">
               <CheckCircle2 className="w-4 h-4 text-emerald-500" />
               <span>
                 {stats.masteredCount}/{stats.totalWords} từ đã thuộc ({stats.masteredPercentage}%)
               </span>
             </div>
-
-            <Link
-              href="/review"
-              className="px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-sm transition-all flex items-center gap-1.5"
-            >
-              <span>📖 Nhật ký</span>
-            </Link>
           </div>
         </header>
 

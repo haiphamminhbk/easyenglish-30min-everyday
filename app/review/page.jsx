@@ -245,14 +245,16 @@ function ReviewContent() {
         </Link>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <Link
-            href="/vocabulary"
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white shadow-md shadow-indigo-500/25 active:scale-95 transition-all ring-2 ring-indigo-400/30"
-            title="Học 3000 từ vựng theo 60 chủ đề & Flashcards 3D"
-          >
-            <span>🎴</span>
-            <span>Học từ vựng</span>
-          </Link>
+          {mode !== 'work' && (
+            <Link
+              href="/vocabulary"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white shadow-md shadow-indigo-500/25 active:scale-95 transition-all ring-2 ring-indigo-400/30"
+              title="Học 3000 từ vựng theo 60 chủ đề & Flashcards 3D"
+            >
+              <span>🎴</span>
+              <span>Học từ vựng</span>
+            </Link>
+          )}
 
           <button
             type="button"

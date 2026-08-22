@@ -231,33 +231,26 @@ export default function TrackerPage() {
             </span>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <Link
-              href="/vocabulary"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white shadow-md shadow-indigo-500/25 active:scale-95 transition-all ring-2 ring-indigo-400/30 animate-pulse hover:animate-none"
-              title="Học 3000 từ vựng theo 60 chủ đề & Flashcards 3D"
-            >
-              <span>🎴</span>
-              <span>Học từ vựng</span>
-            </Link>
-            <button
-              type="button"
-              onClick={() => {
-                const data = loadAllDiaryEntries();
-                setAllDiaryEntries(data.entries);
-                setIsDiaryFlipBookOpen(true);
-              }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/80 hover:bg-amber-100 dark:hover:bg-amber-900/80 text-amber-800 dark:text-amber-300 shadow-sm border border-amber-200/80 dark:border-amber-800/80 active:scale-95 transition-all"
-              title="Mở sổ nhật kí 3D của tôi (Lật trang bằng chuột)"
-            >
-              <span>📖</span>
-              <span>Nhật kí của tôi</span>
-            </button>
             <ModeToggle mode={mode} onModeChange={handleModeChange} />
             <ThemeToggle />
           </div>
         </div>
 
         <header className="text-center mb-8">
+          {!isWork && (
+            <div className="flex justify-center mb-3.5 animate-fadeIn">
+              <Link
+                href="/vocabulary"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-xs sm:text-sm font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 active:scale-95 transition-all ring-2 ring-indigo-400/30 group"
+                title="Học 3000 từ vựng Oxford theo 60 chủ đề & Flashcards 3D"
+              >
+                <span className="text-base group-hover:scale-110 transition-transform">🎴</span>
+                <span>Học từ vựng Oxford 3000</span>
+                <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-bold">60 Chủ đề</span>
+              </Link>
+            </div>
+          )}
+
           <h1
             className={`font-heading text-3xl sm:text-4xl font-bold tracking-tight mb-2 transition-colors duration-300 ${isWork
               ? 'text-[#854d0e] dark:text-amber-300'
