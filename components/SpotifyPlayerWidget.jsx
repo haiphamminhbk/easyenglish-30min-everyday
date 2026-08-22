@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { SPOTIFY_CURATED_PLAYLISTS } from '@/app/api/spotify/route';
+import { SPOTIFY_CURATED_PLAYLISTS } from '@/lib/spotifyData';
 
 export default function SpotifyPlayerWidget({ mode = 'study' }) {
   const peacefulPiano = SPOTIFY_CURATED_PLAYLISTS.find((p) => p.id === '37i9dQZF1DX4sWSpwq3LiO') || SPOTIFY_CURATED_PLAYLISTS[0];

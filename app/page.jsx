@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import {
   getTodayString,
   formatDatePretty,
@@ -20,9 +21,9 @@ import {
   setStoredMode,
   loadAllDiaryEntries,
 } from '@/lib/storage';
-import dynamic from 'next/dynamic';
 import ThemeToggle from '@/components/ThemeToggle';
 import ModeToggle from '@/components/ModeToggle';
+import AuthButton from '@/components/AuthButton';
 
 const NoteModal = dynamic(() => import('@/components/NoteModal'), { ssr: false });
 const NameModal = dynamic(() => import('@/components/NameModal'), { ssr: false });
@@ -85,8 +86,8 @@ export default function TrackerPage() {
     // Initial local load for instant paint
     const savedMode = getStoredMode();
     const initial = loadLocalData(savedMode);
-    setStudyDates(initial.studyDates);
-    setStudyNotes(initial.studyNotes);
+    setStudyDates(initial.dates);
+    setStudyNotes(initial.notes);
     setSavedUserName(initial.savedUserName);
     setIsLoaded(true);
 
@@ -94,11 +95,11 @@ export default function TrackerPage() {
     initStorage((data) => {
       const currentMode = getStoredMode();
       if (currentMode === 'work') {
-        if (data.workDates) setStudyDates(data.workDates);
-        if (data.workNotes) setStudyNotes(data.workNotes);
+        setStudyDates(data.workDates || []);
+        setStudyNotes(data.workNotes || {});
       } else {
-        if (data.studyDates) setStudyDates(data.studyDates);
-        if (data.studyNotes) setStudyNotes(data.studyNotes);
+        setStudyDates(data.studyDates || []);
+        setStudyNotes(data.studyNotes || {});
       }
       if (data.savedUserName) setSavedUserName(data.savedUserName);
     });
@@ -110,8 +111,8 @@ export default function TrackerPage() {
     setStoredMode(newMode);
 
     const loaded = loadLocalData(newMode);
-    setStudyDates(loaded.studyDates);
-    setStudyNotes(loaded.studyNotes);
+    setStudyDates(loaded.dates);
+    setStudyNotes(loaded.notes);
   };
 
   const activeToday = today || (mounted ? getTodayString() : '');
@@ -163,9 +164,15 @@ export default function TrackerPage() {
     await saveUsername(newName);
   };
 
-  // Month data for current month offset
-  const monthData = getMonthCalendar(currentMonthOffset);
-  const completedInMonth = monthData.days.filter((d) => studyDates.includes(d.dateStr)).length;
+  // Month data for current month offset (memoized)
+  const monthData = useMemo(() => getMonthCalendar(currentMonthOffset), [currentMonthOffset]);
+
+  const studyDatesSet = useMemo(() => new Set(studyDates), [studyDates]);
+
+  const completedInMonth = useMemo(() => {
+    return monthData.days.filter((d) => studyDatesSet.has(d.dateStr)).length;
+  }, [monthData.days, studyDatesSet]);
+
   const WEEKDAYS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
   const TOTAL_CALENDAR_SLOTS = 42; // Always 6 rows x 7 columns for fixed, jitter-free height
   const trailingPaddingCount = Math.max(
@@ -173,42 +180,44 @@ export default function TrackerPage() {
     TOTAL_CALENDAR_SLOTS - monthData.startDayIndex - monthData.daysInMonth
   );
 
-  const daysGrid = monthData.days.map((item) => {
-    const { day, dateStr } = item;
-    const isCompleted = studyDates.includes(dateStr);
-    const hasNote = Boolean(studyNotes[dateStr] && studyNotes[dateStr].trim());
-    const isToday = Boolean(mounted && activeToday && dateStr === activeToday);
-    const isPast = Boolean(mounted && activeToday && dateStr < activeToday);
+  const daysGrid = useMemo(() => {
+    return monthData.days.map((item) => {
+      const { day, dateStr } = item;
+      const isCompleted = studyDatesSet.has(dateStr);
+      const hasNote = Boolean(studyNotes[dateStr] && studyNotes[dateStr].trim());
+      const isToday = Boolean(mounted && activeToday && dateStr === activeToday);
+      const isPast = Boolean(mounted && activeToday && dateStr < activeToday);
 
-    let tooltip = formatDatePretty(dateStr);
-    if (isCompleted) {
-      tooltip += isWork ? ' - Đã làm: ' : ' - Đã học: ';
-      if (hasNote) tooltip += `\n${stripFormatting(studyNotes[dateStr])}`;
-      if (isPast) {
-        tooltip += isWork
-          ? '\n(Nhấn để mở trang xem lại công việc 📋)'
-          : '\n(Nhấn để mở trang ôn tập bài học 📖)';
+      let tooltip = formatDatePretty(dateStr);
+      if (isCompleted) {
+        tooltip += isWork ? ' - Đã làm: ' : ' - Đã học: ';
+        if (hasNote) tooltip += `\n${stripFormatting(studyNotes[dateStr])}`;
+        if (isPast) {
+          tooltip += isWork
+            ? '\n(Nhấn để mở trang xem lại công việc 📋)'
+            : '\n(Nhấn để mở trang ôn tập bài học 📖)';
+        }
+      } else if (isToday) {
+        tooltip = isWork ? 'Hôm nay - Tập trung hoàn thành công việc nhé!' : 'Hôm nay - Cố lên nhé!';
+      } else if (isPast) {
+        tooltip += isWork ? ' - Chưa hoàn thành công việc' : ' - Không học bài';
+      } else {
+        tooltip += isWork ? ' - Chưa làm' : ' - Chưa học';
       }
-    } else if (isToday) {
-      tooltip = isWork ? 'Hôm nay - Tập trung hoàn thành công việc nhé!' : 'Hôm nay - Cố lên nhé!';
-    } else if (isPast) {
-      tooltip += isWork ? ' - Chưa hoàn thành công việc' : ' - Không học bài';
-    } else {
-      tooltip += isWork ? ' - Chưa làm' : ' - Chưa học';
-    }
 
-    return {
-      dateStr,
-      day,
-      isCompleted,
-      hasNote,
-      isToday,
-      isPast,
-      tooltip,
-    };
-  });
+      return {
+        dateStr,
+        day,
+        isCompleted,
+        hasNote,
+        isToday,
+        isPast,
+        tooltip,
+      };
+    });
+  }, [monthData.days, studyDatesSet, studyNotes, mounted, activeToday, isWork]);
 
-  const handleBoxClick = (box) => {
+  const handleBoxClick = useCallback((box) => {
     if (box.isCompleted && box.isPast) {
       // Past completed days route strictly to read-only review
       router.push(`/review?date=${box.dateStr}&mode=${mode}`);
@@ -219,7 +228,7 @@ export default function TrackerPage() {
         handleCheckInClick();
       }
     }
-  };
+  }, [router, mode, isCompletedToday]);
 
   return (
     <>
@@ -235,6 +244,7 @@ export default function TrackerPage() {
           <div className="flex items-center gap-2 flex-wrap">
             <ModeToggle mode={mode} onModeChange={handleModeChange} />
             <ThemeToggle />
+            <AuthButton />
           </div>
         </div>
 

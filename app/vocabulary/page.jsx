@@ -21,12 +21,48 @@ import {
   TrendingUp,
   X,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import FlashcardDeck from '@/components/vocabulary/FlashcardDeck';
-import VocabularyQuiz from '@/components/vocabulary/VocabularyQuiz';
-import SpellingPractice from '@/components/vocabulary/SpellingPractice';
-import MatchingGame from '@/components/vocabulary/MatchingGame';
-import VocabularyListView from '@/components/vocabulary/VocabularyListView';
-import TopicSelector from '@/components/vocabulary/TopicSelector';
+
+const VocabularyQuiz = dynamic(() => import('@/components/vocabulary/VocabularyQuiz'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full max-w-xl mx-auto p-12 bg-white/60 dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 text-center animate-pulse text-xs font-semibold text-slate-400">
+      Đang chuẩn bị bộ câu hỏi trắc nghiệm...
+    </div>
+  ),
+});
+
+const SpellingPractice = dynamic(() => import('@/components/vocabulary/SpellingPractice'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full max-w-xl mx-auto p-12 bg-white/60 dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 text-center animate-pulse text-xs font-semibold text-slate-400">
+      Đang tải luyện gõ từ vựng...
+    </div>
+  ),
+});
+
+const MatchingGame = dynamic(() => import('@/components/vocabulary/MatchingGame'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full max-w-xl mx-auto p-12 bg-white/60 dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 text-center animate-pulse text-xs font-semibold text-slate-400">
+      Đang tải trò chơi ghép thẻ từ vựng...
+    </div>
+  ),
+});
+
+const VocabularyListView = dynamic(() => import('@/components/vocabulary/VocabularyListView'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full max-w-4xl mx-auto p-12 bg-white/60 dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 text-center animate-pulse text-xs font-semibold text-slate-400">
+      Đang tải danh sách 3000 từ vựng Oxford...
+    </div>
+  ),
+});
+
+const TopicSelector = dynamic(() => import('@/components/vocabulary/TopicSelector'), {
+  ssr: false,
+});
 import {
   TOPICS,
   DIFFICULTY_LEVELS,
@@ -158,7 +194,7 @@ export default function VocabularyPage() {
                 </h1>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                60 Chủ đề giao tiếp · Phân cấp CEFR (A1 - B2) · Phát âm chuẩn Mỹ
+                60 Chủ đề giao tiếp · Phân cấp CEFR (A1 - B2) · Phát âm chuẩn Anh - Mỹ
               </p>
             </div>
           </div>

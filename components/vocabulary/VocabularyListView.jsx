@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   Volume2,
   Star,
@@ -32,25 +32,26 @@ export default function VocabularyListView({
   const masterSet = useMemo(() => new Set(masteredIds), [masteredIds]);
 
   const filtered = useMemo(() => {
+    const q = search.toLowerCase().trim();
     return words.filter((w) => {
       if (selectedLevel !== 'ALL' && w.level !== selectedLevel) return false;
       if (filterStarredOnly && !starSet.has(w.id)) return false;
       if (filterMasteredOnly && !masterSet.has(w.id)) return false;
 
-      if (search.trim()) {
-        const q = search.toLowerCase().trim();
+      if (q) {
         const inWord = w.word.toLowerCase().includes(q);
         const inMeaning = w.meaning.toLowerCase().includes(q);
+        const inPhonetic = w.phonetic && w.phonetic.toLowerCase().includes(q);
         const inExample = w.example && w.example.toLowerCase().includes(q);
         const inExampleVi = w.exampleVi && w.exampleVi.toLowerCase().includes(q);
-        return inWord || inMeaning || inExample || inExampleVi;
+        return inWord || inMeaning || inPhonetic || inExample || inExampleVi;
       }
       return true;
     });
   }, [words, selectedLevel, filterStarredOnly, filterMasteredOnly, starSet, masterSet, search]);
 
   // Reset pagination when filter criteria change
-  React.useEffect(() => {
+  useEffect(() => {
     setVisibleCount(30);
   }, [search, selectedLevel, filterStarredOnly, filterMasteredOnly]);
 

@@ -1,7 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import RichWordEditor from './RichWordEditor';
+import dynamic from 'next/dynamic';
+
+const RichWordEditor = dynamic(() => import('./RichWordEditor'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full border border-gray-200 dark:border-slate-700 rounded-2xl p-6 min-h-[180px] bg-slate-50/60 dark:bg-slate-800/60 animate-pulse flex items-center justify-center text-slate-400 text-xs font-semibold">
+      Đang tải trình soạn thảo...
+    </div>
+  ),
+});
 
 export default function NoteModal({ isOpen, initialNote, mode = 'study', onClose, onConfirm }) {
   const [note, setNote] = useState('');

@@ -17,8 +17,8 @@ import FormattedNote from '@/components/FormattedNote';
 import ThemeToggle from '@/components/ThemeToggle';
 import ModeToggle from '@/components/ModeToggle';
 
-const RichWordEditor = dynamic(() => import('@/components/RichWordEditor'), { ssr: false });
 const ConfettiEffect = dynamic(() => import('@/components/ConfettiEffect'), { ssr: false });
+const RichWordEditor = dynamic(() => import('@/components/RichWordEditor'), { ssr: false });
 const DiaryFlipBook = dynamic(() => import('@/components/DiaryFlipBook'), { ssr: false });
 
 const VIETNAMESE_DAYS = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
@@ -94,17 +94,17 @@ function ReviewContent() {
   useEffect(() => {
     const currentMode = getStoredMode();
     const initial = loadLocalData(currentMode);
-    setStudyDates(initial.studyDates);
-    setStudyNotes(initial.studyNotes);
+    setStudyDates(initial.dates);
+    setStudyNotes(initial.notes);
 
     initStorage((data) => {
       const m = getStoredMode();
       if (m === 'work') {
-        if (data.workDates) setStudyDates(data.workDates);
-        if (data.workNotes) setStudyNotes(data.workNotes);
+        setStudyDates(data.workDates || []);
+        setStudyNotes(data.workNotes || {});
       } else {
-        if (data.studyDates) setStudyDates(data.studyDates);
-        if (data.studyNotes) setStudyNotes(data.studyNotes);
+        setStudyDates(data.studyDates || []);
+        setStudyNotes(data.studyNotes || {});
       }
     });
   }, []);
@@ -114,8 +114,8 @@ function ReviewContent() {
     setStoredMode(newMode);
 
     const loaded = loadLocalData(newMode);
-    setStudyDates(loaded.studyDates);
-    setStudyNotes(loaded.studyNotes);
+    setStudyDates(loaded.dates);
+    setStudyNotes(loaded.notes);
     setIsEditing(false);
 
     router.push(`/review?date=${currentDate || today}&mode=${newMode}`);
