@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⏰ Easy English Reminder</title>
-    
+
     <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
+
     <!-- Custom Styles -->
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body class="flex items-center justify-center min-h-screen p-4 sm:p-8">
 
     <!-- 3D Background Canvas -->
@@ -19,13 +21,15 @@
 
     <!-- Main Content Container -->
     <main class="glass-panel w-full max-w-lg p-8 rounded-3xl relative z-10 mx-auto">
-        
+
         <header class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-semibold tracking-normal mb-2" style="font-family: 'Poppins', sans-serif; color: #2d5a8c; letter-spacing: 0.5px;">EASY ENGLISH</h1>
+            <h1 class="text-3xl sm:text-4xl font-semibold tracking-normal mb-2"
+                style="font-family: 'Poppins', sans-serif; color: #2d5a8c; letter-spacing: 0.5px;">EASY ENGLISH</h1>
             <h2 class="text-lg font-semibold text-indigo-600 mt-1 mb-3">Mỗi ngày 30 phút – Tiến bộ từng bước một</h2>
-            
+
             <p class="text-gray-600 mt-2 text-sm leading-relaxed">
-                Dành <strong>30 phút</strong> mỗi ngày để nâng cao trình độ tiếng Anh. Hôm nay bạn đã hoàn thành mục tiêu chưa?
+                Dành <strong>30 phút</strong> mỗi ngày để nâng cao trình độ tiếng Anh. Hôm nay bạn đã hoàn thành mục
+                tiêu chưa?
             </p>
 
             <!-- Quotation -->
@@ -35,17 +39,21 @@
             </blockquote>
 
             <p class="text-gray-500 mt-3 text-xs leading-relaxed italic px-2">
-                Đừng chờ đến khi có nhiều thời gian mới bắt đầu học. 30 phút mỗi ngày có thể không tạo ra sự thay đổi ngay lập tức, nhưng sự kiên trì mỗi ngày sẽ tạo nên khác biệt lớn theo thời gian.
+                Đừng chờ đến khi có nhiều thời gian mới bắt đầu học. 30 phút mỗi ngày có thể không tạo ra sự thay đổi
+                ngay lập tức, nhưng sự kiên trì mỗi ngày sẽ tạo nên khác biệt lớn theo thời gian.
             </p>
-            
+
             <!-- Auth / Sync status (optional display) -->
-            <div id="authStatus" class="mt-4 hidden inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm transition-all duration-300">
+            <div id="authStatus"
+                class="mt-4 hidden inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm transition-all duration-300">
                 <span class="animate-pulse w-2 h-2 rounded-full bg-yellow-400"></span> Đang kết nối...
             </div>
-            
+
             <!-- User Greeting -->
             <div id="greetingMessage" class="mt-6 text-md font-semibold text-gray-700 hidden">
-                Xin chào <span id="userNameDisplay" class="text-indigo-600 cursor-pointer hover:text-indigo-800 transition-colors" title="Nhấn để đổi tên">bạn ✏️</span>! Bạn đã kiên trì để đạt được:
+                Xin chào <span id="userNameDisplay"
+                    class="text-indigo-600 cursor-pointer hover:text-indigo-800 transition-colors"
+                    title="Nhấn để đổi tên">bạn ✏️</span>! Bạn đã kiên trì để đạt được:
             </div>
         </header>
 
@@ -68,7 +76,8 @@
         </div>
 
         <!-- Check-in Action Button -->
-        <button id="checkInBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform shadow-lg hover:shadow-indigo-500/30 active:scale-95 text-lg mb-8 pulse-btn disabled:opacity-75 disabled:cursor-not-allowed">
+        <button id="checkInBtn"
+            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform shadow-lg hover:shadow-indigo-500/30 active:scale-95 text-lg mb-8 pulse-btn disabled:opacity-75 disabled:cursor-not-allowed">
             Hoàn thành 30 phút! 🚀
         </button>
 
@@ -76,7 +85,8 @@
         <section>
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wide">Tiến độ theo tháng</h3>
-                <span id="periodDisplay" class="text-xs text-gray-500 bg-gray-100 px-2.5 py-1 rounded-md font-medium">Lịch sử</span>
+                <span id="periodDisplay"
+                    class="text-xs text-gray-500 bg-gray-100 px-2.5 py-1 rounded-md font-medium">Lịch sử</span>
             </div>
 
             <!-- Weekday Headers -->
@@ -89,7 +99,7 @@
                 <div class="py-0.5">T7</div>
                 <div class="py-0.5">CN</div>
             </div>
-            
+
             <!-- Grid: 7 cols with weekday alignment -->
             <div class="grid grid-cols-7 gap-2 sm:gap-2.5" id="trackerGrid">
                 <!-- Javascript populates day boxes -->
@@ -97,58 +107,78 @@
 
             <!-- Navigation Buttons -->
             <div class="flex items-center justify-between mt-6 gap-4">
-                <button id="prevBtn" class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200 active:scale-95 text-xs sm:text-sm">
+                <button id="prevBtn"
+                    class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200 active:scale-95 text-xs sm:text-sm">
                     ← Tháng trước
                 </button>
-                <button id="nextBtn" class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200 active:scale-95 text-xs sm:text-sm">
+                <button id="nextBtn"
+                    class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200 active:scale-95 text-xs sm:text-sm">
                     Tháng sau →
                 </button>
             </div>
         </section>
 
         <!-- Footer -->
-        <footer class="mt-12 text-center text-xs text-gray-600 flex flex-col items-center gap-3 pt-6 border-t border-gray-200">
-            <p class="text-sm font-semibold text-gray-700" style="font-family: 'Poppins', sans-serif;">Easy English, learn English with ease!</p>
-            <a href="mailto:easyenglish.mrhai@gmail.com" class="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 transition-colors">
+        <footer
+            class="mt-12 text-center text-xs text-gray-600 flex flex-col items-center gap-3 pt-6 border-t border-gray-200">
+            <p class="text-sm font-semibold text-gray-700" style="font-family: 'Poppins', sans-serif;">Easy English,
+                learn English with ease!</p>
+            <!-- <a href="mailto:easyenglish.mrhai@gmail.com" class="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 transition-colors">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
                     <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
                 </svg>
                 <span>easyenglish.mrhai@gmail.com</span>
-            </a>
+            </a> -->
         </footer>
     </main>
 
     <!-- Note Modal -->
-    <div id="noteModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center transition-opacity opacity-0">
-        <div class="bg-white rounded-2xl p-6 w-[92%] max-w-lg shadow-2xl transform scale-95 transition-transform duration-300" id="noteModalContent">
+    <div id="noteModal"
+        class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center transition-opacity opacity-0">
+        <div class="bg-white rounded-2xl p-6 w-[92%] max-w-lg shadow-2xl transform scale-95 transition-transform duration-300"
+            id="noteModalContent">
             <div class="flex items-center justify-between mb-2">
                 <h3 class="text-xl font-bold text-gray-800">🎉 Ghi chú bài học</h3>
-                <span id="noteWordCounter" class="text-xs font-medium text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">0 từ • 0 ký tự</span>
+                <span id="noteWordCounter"
+                    class="text-xs font-medium text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">0 từ • 0 ký tự</span>
             </div>
-            <p class="text-xs text-gray-500 mb-3">Bạn đã học gì hôm nay? Dùng thanh công cụ để định dạng và ghi chú từ vựng.</p>
-            
+            <p class="text-xs text-gray-500 mb-3">Bạn đã học gì hôm nay? Dùng thanh công cụ để định dạng và ghi chú từ
+                vựng.</p>
+
             <!-- Word Editor Toolbar -->
             <div id="noteEditorToolbar"></div>
 
-            <textarea id="dailyNote" rows="9" class="w-full min-h-[220px] max-h-[50vh] border border-gray-300 rounded-xl p-3.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-y leading-relaxed" placeholder="Ví dụ: Đã học 10 từ vựng chủ đề gia đình, luyện nghe podcast 15 phút..."></textarea>
-            
+            <textarea id="dailyNote" rows="9"
+                class="w-full min-h-[220px] max-h-[50vh] border border-gray-300 rounded-xl p-3.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-y leading-relaxed"
+                placeholder="Ví dụ: Đã học 10 từ vựng chủ đề gia đình, luyện nghe podcast 15 phút..."></textarea>
+
             <div class="mt-4 flex justify-end gap-3">
-                <button id="cancelNoteBtn" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Hủy</button>
-                <button id="confirmNoteBtn" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-md">Xác nhận & Lưu</button>
+                <button id="cancelNoteBtn"
+                    class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Hủy</button>
+                <button id="confirmNoteBtn"
+                    class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-md">Xác
+                    nhận & Lưu</button>
             </div>
         </div>
     </div>
 
     <!-- Name Modal -->
-    <div id="nameModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center transition-opacity opacity-0">
-        <div class="bg-white rounded-2xl p-6 w-[90%] max-w-sm shadow-2xl transform scale-95 transition-transform duration-300" id="nameModalContent">
+    <div id="nameModal"
+        class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center transition-opacity opacity-0">
+        <div class="bg-white rounded-2xl p-6 w-[90%] max-w-sm shadow-2xl transform scale-95 transition-transform duration-300"
+            id="nameModalContent">
             <h3 class="text-xl font-bold text-gray-800 mb-2">👋 Xin chào!</h3>
             <p class="text-sm text-gray-600 mb-4">Bạn tên là gì nhỉ?</p>
-            <input type="text" id="userNameInput" class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" placeholder="Nhập tên của bạn...">
+            <input type="text" id="userNameInput"
+                class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                placeholder="Nhập tên của bạn...">
             <div class="mt-5 flex justify-end gap-3">
-                <button id="cancelNameBtn" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Hủy</button>
-                <button id="confirmNameBtn" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-md">Lưu tên</button>
+                <button id="cancelNameBtn"
+                    class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Hủy</button>
+                <button id="confirmNameBtn"
+                    class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-md">Lưu
+                    tên</button>
             </div>
         </div>
     </div>
@@ -156,4 +186,5 @@
     <!-- Application Entry Script (ES Module) -->
     <script type="module" src="js/app.js"></script>
 </body>
+
 </html>

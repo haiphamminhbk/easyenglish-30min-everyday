@@ -250,20 +250,18 @@ export default function TrackerPage() {
 
         <header className="text-center mb-8">
           <h1
-            className={`font-heading text-3xl sm:text-4xl font-bold tracking-tight mb-2 transition-colors duration-300 ${
-              isWork
-                ? 'text-[#854d0e] dark:text-amber-300'
-                : 'text-[#2d5a8c] dark:text-indigo-300'
-            }`}
+            className={`font-heading text-3xl sm:text-4xl font-bold tracking-tight mb-2 transition-colors duration-300 ${isWork
+              ? 'text-[#854d0e] dark:text-amber-300'
+              : 'text-[#2d5a8c] dark:text-indigo-300'
+              }`}
           >
             {isWork ? 'EASY WORKFLOW' : 'EASY ENGLISH'}
           </h1>
           <h2
-            className={`text-lg font-semibold mt-1 mb-3 transition-colors duration-300 ${
-              isWork
-                ? 'text-amber-600 dark:text-amber-400'
-                : 'text-indigo-600 dark:text-indigo-400'
-            }`}
+            className={`text-lg font-semibold mt-1 mb-3 transition-colors duration-300 ${isWork
+              ? 'text-amber-600 dark:text-amber-400'
+              : 'text-indigo-600 dark:text-indigo-400'
+              }`}
           >
             {isWork
               ? 'Mỗi ngày 30 phút – Tập trung cao độ & Hiệu suất'
@@ -306,11 +304,10 @@ export default function TrackerPage() {
             Xin chào{' '}
             <span
               onClick={() => setIsNameModalOpen(true)}
-              className={`cursor-pointer transition-colors ${
-                isWork
-                  ? 'text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300'
-                  : 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300'
-              }`}
+              className={`cursor-pointer transition-colors ${isWork
+                ? 'text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300'
+                : 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300'
+                }`}
               title="Nhấn để đổi tên"
             >
               {savedUserName === 'bạn' ? 'bạn ✏️' : savedUserName}
@@ -335,11 +332,10 @@ export default function TrackerPage() {
               {isWork ? 'Tổng số ngày làm' : 'Tổng số ngày học'}
             </p>
             <div
-              className={`text-3xl font-bold flex items-center justify-center gap-1 ${
-                isWork
-                  ? 'text-amber-600 dark:text-amber-400'
-                  : 'text-indigo-600 dark:text-indigo-400'
-              }`}
+              className={`text-3xl font-bold flex items-center justify-center gap-1 ${isWork
+                ? 'text-amber-600 dark:text-amber-400'
+                : 'text-indigo-600 dark:text-indigo-400'
+                }`}
             >
               <span>{studyDates.length}</span>
               <span className="text-2xl">{isWork ? '💼' : '🌟'}</span>
@@ -357,21 +353,20 @@ export default function TrackerPage() {
           type="button"
           onClick={handleCheckInClick}
           disabled={isCompletedToday}
-          className={`w-full font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform shadow-lg text-lg mb-4 ${
-            isCompletedToday
-              ? 'bg-emerald-600 dark:bg-emerald-700 text-white cursor-not-allowed opacity-90'
-              : isWork
+          className={`w-full font-bold py-4 px-8 rounded-2xl transition-all duration-300 transform shadow-lg text-lg mb-4 ${isCompletedToday
+            ? 'bg-emerald-600 dark:bg-emerald-700 text-white cursor-not-allowed opacity-90'
+            : isWork
               ? 'bg-amber-600 hover:bg-amber-700 dark:bg-amber-600 dark:hover:bg-amber-500 text-white hover:shadow-amber-500/30 active:scale-95 pulse-btn'
               : 'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white hover:shadow-indigo-500/30 active:scale-95 pulse-btn'
-          }`}
+            }`}
         >
           {isCompletedToday
             ? isWork
               ? 'Đã hoàn thành công việc hôm nay ✔️'
               : 'Đã hoàn thành mục tiêu hôm nay ✔️'
             : isWork
-            ? 'Hoàn thành 30 phút làm việc! 🚀'
-            : 'Hoàn thành 30 phút! 🚀'}
+              ? 'Hoàn thành 30 phút làm việc! 🚀'
+              : 'Hoàn thành 30 phút! 🚀'}
         </button>
 
         {/* Diary 3D FlipBook Quick Action Card */}
@@ -382,11 +377,10 @@ export default function TrackerPage() {
             setAllDiaryEntries(data.entries);
             setIsDiaryFlipBookOpen(true);
           }}
-          className={`w-full mb-8 p-3.5 rounded-2xl flex items-center justify-between transition-all duration-300 shadow-md hover:shadow-lg border group active:scale-98 text-left ${
-            isWork
-              ? 'bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-transparent hover:bg-amber-500/15 border-amber-300/60 dark:border-amber-700/60 text-amber-950 dark:text-amber-200'
-              : 'bg-gradient-to-r from-indigo-500/10 via-indigo-400/5 to-transparent hover:bg-indigo-500/15 border-indigo-200/80 dark:border-indigo-800/80 text-indigo-950 dark:text-indigo-200'
-          }`}
+          className={`w-full mb-8 p-3.5 rounded-2xl flex items-center justify-between transition-all duration-300 shadow-md hover:shadow-lg border group active:scale-98 text-left ${isWork
+            ? 'bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-transparent hover:bg-amber-500/15 border-amber-300/60 dark:border-amber-700/60 text-amber-950 dark:text-amber-200'
+            : 'bg-gradient-to-r from-indigo-500/10 via-indigo-400/5 to-transparent hover:bg-indigo-500/15 border-indigo-200/80 dark:border-indigo-800/80 text-indigo-950 dark:text-indigo-200'
+            }`}
         >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-amber-400/20 dark:bg-amber-400/10 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform">
@@ -421,11 +415,10 @@ export default function TrackerPage() {
                 <button
                   type="button"
                   onClick={() => setCurrentMonthOffset(0)}
-                  className={`text-[11px] font-semibold px-2 py-0.5 rounded-md transition-colors border ${
-                    isWork
-                      ? 'text-amber-600 dark:text-amber-300 hover:text-amber-700 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 border-amber-200/60 dark:border-amber-800/60'
-                      : 'text-indigo-600 dark:text-indigo-300 hover:text-indigo-700 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border-indigo-200/60 dark:border-indigo-800/60'
-                  }`}
+                  className={`text-[11px] font-semibold px-2 py-0.5 rounded-md transition-colors border ${isWork
+                    ? 'text-amber-600 dark:text-amber-300 hover:text-amber-700 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 border-amber-200/60 dark:border-amber-800/60'
+                    : 'text-indigo-600 dark:text-indigo-300 hover:text-indigo-700 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border-indigo-200/60 dark:border-indigo-800/60'
+                    }`}
                 >
                   Tháng này
                 </button>
@@ -442,11 +435,10 @@ export default function TrackerPage() {
           {/* Monthly Progress Bar */}
           <div className="w-full bg-gray-100 dark:bg-slate-700/80 rounded-full h-1.5 mb-4 overflow-hidden">
             <div
-              className={`h-1.5 rounded-full transition-all duration-500 ${
-                isWork
-                  ? 'bg-gradient-to-r from-amber-500 to-emerald-500'
-                  : 'bg-gradient-to-r from-indigo-500 to-emerald-500'
-              }`}
+              className={`h-1.5 rounded-full transition-all duration-500 ${isWork
+                ? 'bg-gradient-to-r from-amber-500 to-emerald-500'
+                : 'bg-gradient-to-r from-indigo-500 to-emerald-500'
+                }`}
               style={{
                 width: `${Math.round((completedInMonth / monthData.daysInMonth) * 100)}%`,
               }}
@@ -460,11 +452,10 @@ export default function TrackerPage() {
               return (
                 <div
                   key={w}
-                  className={`py-1 rounded-md ${
-                    isWeekend
-                      ? 'text-amber-600 dark:text-amber-400 bg-amber-50/60 dark:bg-amber-950/40'
-                      : 'text-slate-400 dark:text-slate-400'
-                  }`}
+                  className={`py-1 rounded-md ${isWeekend
+                    ? 'text-amber-600 dark:text-amber-400 bg-amber-50/60 dark:bg-amber-950/40'
+                    : 'text-slate-400 dark:text-slate-400'
+                    }`}
                 >
                   {w}
                 </div>
@@ -485,11 +476,9 @@ export default function TrackerPage() {
                 onClick={() => handleBoxClick(box)}
                 data-title={box.tooltip}
                 suppressHydrationWarning
-                className={`day-box ${box.isCompleted ? 'completed' : ''} ${
-                  box.hasNote ? 'has-note' : ''
-                } ${box.isToday && !box.isCompleted ? 'today' : ''} ${
-                  box.isToday && box.isCompleted ? 'today completed' : ''
-                }`}
+                className={`day-box ${box.isCompleted ? 'completed' : ''} ${box.hasNote ? 'has-note' : ''
+                  } ${box.isToday && !box.isCompleted ? 'today' : ''} ${box.isToday && box.isCompleted ? 'today completed' : ''
+                  }`}
               >
                 <span>{box.day}</span>
                 {box.hasNote && <span className="note-dot" />}
@@ -514,11 +503,10 @@ export default function TrackerPage() {
             </span>
             <span className="flex items-center gap-1.5">
               <span
-                className={`w-2.5 h-2.5 rounded-md border-2 ${
-                  isWork
-                    ? 'border-amber-600 dark:border-amber-400 bg-amber-50 dark:bg-amber-950/60'
-                    : 'border-indigo-600 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-950/60'
-                }`}
+                className={`w-2.5 h-2.5 rounded-md border-2 ${isWork
+                  ? 'border-amber-600 dark:border-amber-400 bg-amber-50 dark:bg-amber-950/60'
+                  : 'border-indigo-600 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-950/60'
+                  }`}
               />
               <span>Hôm nay</span>
             </span>
@@ -552,7 +540,7 @@ export default function TrackerPage() {
               ? 'Easy Workflow, achieve deep focus and high productivity!'
               : 'Easy English, learn English with ease!'}
           </p>
-          <a
+          {/* <a
             href="mailto:easyenglish.mrhai@gmail.com"
             className={`flex items-center gap-2 transition-colors ${
               isWork
@@ -565,7 +553,7 @@ export default function TrackerPage() {
               <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
             </svg>
             <span>easyenglish.mrhai@gmail.com</span>
-          </a>
+          </a> */}
         </footer>
       </main>
 
