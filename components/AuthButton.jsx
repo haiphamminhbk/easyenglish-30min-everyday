@@ -164,7 +164,7 @@ export default function AuthButton() {
 
           <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 rounded-xl p-2 flex items-center gap-2 text-[11px] text-emerald-700 dark:text-emerald-300 font-medium">
             <ShieldCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-            <span>Tiến độ học đã được đồng bộ Cloud an toàn.</span>
+            <span>Tiến độ học đã được đồng bộ an toàn.</span>
           </div>
 
           <button

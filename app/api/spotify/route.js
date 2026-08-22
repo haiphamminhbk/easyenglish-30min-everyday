@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { SPOTIFY_CURATED_PLAYLISTS } from '@/lib/spotifyData';
 
-export { SPOTIFY_CURATED_PLAYLISTS };
-
 /**
  * Spotify Web API Proxy / Curated Endpoint
  */
