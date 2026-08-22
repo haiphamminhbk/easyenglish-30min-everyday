@@ -16,18 +16,22 @@ export default function NoteModal({ isOpen, initialNote, mode = 'study', onClose
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-900/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/90 rounded-2xl p-6 w-full max-w-xl shadow-2xl transform transition-all duration-200">
-        <h3 className="font-heading text-xl font-bold text-slate-900 dark:text-white mb-1.5 flex items-center gap-2">
-          <span>{isWork ? '💼' : '🎉'}</span>
-          <span>{isWork ? 'Ghi chú công việc & nhiệm vụ hôm nay' : 'Ghi chú bài học hôm nay'}</span>
-        </h3>
-        <p className="text-xs text-slate-600 dark:text-slate-300 mb-4 leading-relaxed">
-          {isWork
-            ? 'Bạn đã hoàn thành những gì trong 30 phút tập trung qua? Ghi lại danh sách nhiệm vụ, kết quả cuộc họp, sự kiện hoặc ghi chú bàn giao.'
-            : 'Bạn đã học gì trong 30 phút qua? Sử dụng trình soạn thảo để định dạng và ghi chú từ vựng, cấu trúc & ngữ pháp.'}
-        </p>
+    <div className="fixed inset-0 bg-gray-900/60 dark:bg-black/80 backdrop-blur-sm z-50 overflow-y-auto p-3 pt-3 pb-16 sm:p-4 sm:pb-6 flex items-start sm:items-center justify-center">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/90 rounded-2xl p-4 sm:p-6 w-full max-w-xl shadow-2xl transform transition-all duration-200 my-2 sm:my-auto">
+        {/* Textintro: Title & Description */}
+        <div className="mb-3">
+          <h3 className="font-heading text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-1.5 flex items-center gap-2">
+            <span>{isWork ? '💼' : '🎉'}</span>
+            <span>{isWork ? 'Ghi chú công việc & nhiệm vụ hôm nay' : 'Ghi chú bài học hôm nay'}</span>
+          </h3>
+          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+            {isWork
+              ? 'Bạn đã hoàn thành những gì trong 30 phút tập trung qua? Ghi lại danh sách nhiệm vụ, kết quả cuộc họp, sự kiện hoặc ghi chú bàn giao.'
+              : 'Bạn đã học gì trong 30 phút qua? Sử dụng trình soạn thảo để định dạng và ghi chú từ vựng, cấu trúc & ngữ pháp.'}
+          </p>
+        </div>
 
+        {/* Textarea / RichWordEditor */}
         <RichWordEditor
           value={note}
           onChange={setNote}
@@ -37,10 +41,11 @@ export default function NoteModal({ isOpen, initialNote, mode = 'study', onClose
               ? 'Ví dụ: Đã hoàn thành báo cáo tuần, xử lý 5 ticket khách hàng, chốt kế hoạch dự án sprint mới...'
               : 'Ví dụ: Đã học 10 từ vựng chủ đề du lịch, luyện phát âm /θ/ và /ð/, làm bài tập thì hiện tại đơn...'
           }
-          minHeight="220px"
+          minHeight="160px"
         />
 
-        <div className="mt-4 flex justify-end gap-3">
+        {/* Action Buttons */}
+        <div className="mt-4 pt-1 flex justify-end gap-3 pb-2">
           <button
             type="button"
             onClick={onClose}

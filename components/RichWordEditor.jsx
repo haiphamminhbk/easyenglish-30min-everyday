@@ -12,7 +12,7 @@ export default function RichWordEditor({
   onChange,
   mode = 'study',
   placeholder,
-  minHeight = '220px',
+  minHeight = '160px',
 }) {
   const isWork = mode === 'work';
   const defaultPlaceholder = isWork
@@ -58,7 +58,7 @@ export default function RichWordEditor({
 
   if (!editor) {
     return (
-      <div className="w-full border border-gray-300 dark:border-slate-700 rounded-xl p-4 min-h-[220px] bg-gray-50/50 dark:bg-slate-800/50 animate-pulse text-gray-400 dark:text-slate-400 text-sm">
+      <div className="w-full border border-gray-300 dark:border-slate-700 rounded-xl p-4 min-h-[140px] bg-gray-50/50 dark:bg-slate-800/50 animate-pulse text-gray-400 dark:text-slate-400 text-sm">
         Đang tải trình soạn thảo...
       </div>
     );
@@ -74,9 +74,11 @@ export default function RichWordEditor({
   };
 
   return (
-    <div className="w-full border border-gray-300 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-900 shadow-xs overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition-all">
+    <div
+      className="w-full border border-gray-300 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-900 shadow-xs overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition-all flex flex-col"
+    >
       {/* Top Header & Counter */}
-      <div className="flex items-center justify-between px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800/95 border-b border-gray-200 dark:border-slate-700 text-xs">
+      <div className="flex-shrink-0 flex items-center justify-between px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800/95 border-b border-gray-200 dark:border-slate-700 text-xs">
         <span className="font-bold text-gray-800 dark:text-slate-100 uppercase tracking-wide flex items-center gap-1.5">
           <span>{isWork ? '💼' : '📝'}</span>
           <span>{isWork ? 'Trình soạn thảo công việc' : 'Trình soạn thảo bài học'}</span>
@@ -87,7 +89,7 @@ export default function RichWordEditor({
       </div>
 
       {/* Word-Style Toolbar Ribbon */}
-      <div className="flex items-center gap-1.5 flex-wrap p-2.5 bg-gray-100/70 dark:bg-slate-800/70 border-b border-gray-200 dark:border-slate-700 text-xs">
+      <div className="flex-shrink-0 flex items-center gap-1.5 flex-wrap p-2.5 bg-gray-100/70 dark:bg-slate-800/70 border-b border-gray-200 dark:border-slate-700 text-xs">
         {/* Undo / Redo */}
         <button
           type="button"
@@ -375,7 +377,10 @@ export default function RichWordEditor({
       </div>
 
       {/* TipTap Editor Content */}
-      <div style={{ minHeight }} className="overflow-y-auto max-h-[50vh] p-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+      <div
+        style={{ minHeight }}
+        className="overflow-y-auto max-h-[28vh] sm:max-h-[42vh] p-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex-1 min-h-0"
+      >
         <EditorContent editor={editor} />
       </div>
     </div>

@@ -19,8 +19,8 @@ export default function NameModal({ isOpen, currentName, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-900/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/90 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+    <div className="fixed inset-0 bg-gray-900/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/90 rounded-2xl p-5 sm:p-6 w-full max-w-sm shadow-2xl my-auto max-h-[92dvh] flex flex-col">
         <h3 className="font-heading text-xl font-bold text-slate-900 dark:text-white mb-1.5 flex items-center gap-2">
           <span>👋</span>
           <span>Xin chào!</span>
