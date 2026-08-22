@@ -38,37 +38,39 @@ export default function LeaderboardPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isCertificateOpen, setIsCertificateOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [localUpdateTick, setLocalUpdateTick] = useState(0);
 
-  // Listen to auth changes and sync leaderboard to Firestore
+  // Subscribe to auth state and realtime Firestore leaderboard ONCE on mount
   useEffect(() => {
+    // 1. Initial sync of user stats to cloud
+    syncUserLeaderboardToFirestore();
+
+    // 2. Listen to auth changes
     const unsubAuth = subscribeToAuthState(({ user }) => {
       if (user) {
         syncUserLeaderboardToFirestore();
-        setRefreshKey((prev) => prev + 1);
+        setLocalUpdateTick((prev) => prev + 1);
       }
     });
 
-    syncUserLeaderboardToFirestore();
-
+    // 3. Listen to realtime Firestore leaderboard
     const unsubLeaderboard = subscribeLeaderboard((learners) => {
       setCloudLearners(learners);
       setIsLoaded(true);
     });
 
-    setIsLoaded(true);
     return () => {
       unsubAuth();
       if (typeof unsubLeaderboard === 'function') {
         unsubLeaderboard();
       }
     };
-  }, [refreshKey]);
+  }, []);
 
   // Compute unified leaderboard with priority: Streak -> Total Days -> Diligence XP
   const unifiedList = useMemo(() => {
     return getUnifiedLeaderboard(cloudLearners, timeFrame);
-  }, [cloudLearners, timeFrame, refreshKey]);
+  }, [cloudLearners, timeFrame, localUpdateTick]);
 
   // Current user's stats inside ranked list
   const currentUserStats = useMemo(() => {
@@ -92,7 +94,8 @@ export default function LeaderboardPage() {
   }, [unifiedList]);
 
   const handleQuestClaimed = () => {
-    setRefreshKey((prev) => prev + 1);
+    syncUserLeaderboardToFirestore(true);
+    setLocalUpdateTick((prev) => prev + 1);
   };
 
   const [displayLimit, setDisplayLimit] = useState(50);
