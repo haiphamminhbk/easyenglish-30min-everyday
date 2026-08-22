@@ -20,9 +20,25 @@ const beVietnamPro = Be_Vietnam_Pro({
   display: 'swap',
 });
 
+export const viewport = {
+  themeColor: '#4f46e5',
+  width: 'device-width',
+  initialScale: 1,
+};
+
 export const metadata = {
-  title: '⏰ Easy English - Mỗi ngày 30 phút',
-  description: 'Dành 30 phút mỗi ngày để nâng cao trình độ tiếng Anh. Theo dõi chuỗi ngày học, ghi chú từ vựng, ngữ pháp và cấu trúc câu.',
+  title: '⏰ Easy English & Workflow - Mỗi ngày 30 phút',
+  description: 'Dành 30 phút mỗi ngày để nâng cao trình độ tiếng Anh & làm việc tập trung cao độ. Theo dõi chuỗi ngày học, 3000 từ vựng Oxford và bảng xếp hạng.',
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/icon.svg',
+    apple: '/icon.svg',
+  },
+  openGraph: {
+    title: 'Easy English - 30 Phút Mỗi Ngày',
+    description: 'Theo dõi chuỗi ngày học tiếng Anh, từ vựng Oxford và nhật ký học tập.',
+    type: 'website',
+  },
 };
 
 export default function RootLayout({ children }) {
