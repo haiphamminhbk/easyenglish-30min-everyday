@@ -14,7 +14,7 @@ import {
   Sparkles,
   BookOpen,
 } from 'lucide-react';
-import { speakWord } from '@/lib/vocabularyStorage';
+import { speakWord, preloadWordAudio } from '@/lib/vocabularyStorage';
 import { getTopicById } from '@/lib/vocabularyData';
 
 const LEVEL_CONFIG = {
@@ -66,6 +66,21 @@ export default function FlashcardDeck({
     setIsFlipped(false);
     setIsPlaying(false);
   }, [words]);
+
+  // Preload audio for current and upcoming cards into instant cache
+  useEffect(() => {
+    if (deck.length > 0) {
+      const current = deck[currentIndex];
+      if (current?.word) {
+        preloadWordAudio(current.word, accent);
+      }
+      const nextIndex = (currentIndex + 1) % deck.length;
+      const nextWord = deck[nextIndex];
+      if (nextWord?.word) {
+        preloadWordAudio(nextWord.word, accent);
+      }
+    }
+  }, [currentIndex, deck, accent]);
 
   const currentWord = deck[currentIndex] || null;
   const isMastered = currentWord ? masteredIds.includes(currentWord.id) : false;

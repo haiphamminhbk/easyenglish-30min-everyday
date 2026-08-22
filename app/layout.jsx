@@ -1,6 +1,10 @@
 import './globals.css';
-import Background3D from '@/components/Background3D';
+import dynamic from 'next/dynamic';
 import { Inter, Be_Vietnam_Pro } from 'next/font/google';
+
+const Background3D = dynamic(() => import('@/components/Background3D'), {
+  ssr: false,
+});
 
 const inter = Inter({
   subsets: ['latin', 'vietnamese'],

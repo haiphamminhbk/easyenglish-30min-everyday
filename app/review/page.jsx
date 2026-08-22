@@ -12,12 +12,14 @@ import {
   setStoredMode,
   loadAllDiaryEntries,
 } from '@/lib/storage';
+import dynamic from 'next/dynamic';
 import FormattedNote from '@/components/FormattedNote';
-import RichWordEditor from '@/components/RichWordEditor';
 import ThemeToggle from '@/components/ThemeToggle';
 import ModeToggle from '@/components/ModeToggle';
-import ConfettiEffect from '@/components/ConfettiEffect';
-import DiaryFlipBook from '@/components/DiaryFlipBook';
+
+const RichWordEditor = dynamic(() => import('@/components/RichWordEditor'), { ssr: false });
+const ConfettiEffect = dynamic(() => import('@/components/ConfettiEffect'), { ssr: false });
+const DiaryFlipBook = dynamic(() => import('@/components/DiaryFlipBook'), { ssr: false });
 
 const VIETNAMESE_DAYS = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
 const ENGLISH_DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];

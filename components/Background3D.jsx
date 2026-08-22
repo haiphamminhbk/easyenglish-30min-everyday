@@ -10,17 +10,26 @@ export default function Background3D() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+
     let scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(0x0f172a, 0.001);
 
     let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 2000);
     camera.position.z = 1000;
 
-    let renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    let renderer = new THREE.WebGLRenderer({
+      canvas,
+      alpha: true,
+      antialias: !isMobile,
+      powerPreference: 'low-power',
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
 
-    const particleCount = 1500;
+    // Adaptive particle count based on device capability
+    const particleCount = isMobile ? 450 : 1200;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
@@ -41,11 +50,11 @@ export default function Background3D() {
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
     const material = new THREE.PointsMaterial({
-      size: 6,
+      size: isMobile ? 5 : 6,
       vertexColors: true,
       transparent: true,
       opacity: 0.8,
-      sizeAttenuation: true
+      sizeAttenuation: true,
     });
 
     const particles = new THREE.Points(geometry, material);
@@ -57,8 +66,8 @@ export default function Background3D() {
     let windowHalfY = window.innerHeight / 2;
 
     const onDocumentMouseMove = (event) => {
-      mouseX = (event.clientX - windowHalfX) * 0.5;
-      mouseY = (event.clientY - windowHalfY) * 0.5;
+      mouseX = (event.clientX - windowHalfX) * 0.4;
+      mouseY = (event.clientY - windowHalfY) * 0.4;
     };
 
     const onWindowResize = () => {
@@ -69,31 +78,62 @@ export default function Background3D() {
       renderer.setSize(window.innerWidth, window.innerHeight);
     };
 
-    window.addEventListener('resize', onWindowResize);
-    document.addEventListener('mousemove', onDocumentMouseMove);
+    window.addEventListener('resize', onWindowResize, { passive: true });
+    if (!isMobile) {
+      document.addEventListener('mousemove', onDocumentMouseMove, { passive: true });
+    }
 
-    let animationFrameId;
+    let animationFrameId = null;
+    let isPaused = false;
+
     const animate = () => {
+      if (isPaused) return;
       animationFrameId = requestAnimationFrame(animate);
-      particles.rotation.x += 0.0002;
-      particles.rotation.y += 0.0005;
-      camera.position.x += (mouseX - camera.position.x) * 0.05;
-      camera.position.y += (-mouseY - camera.position.y) * 0.05;
+
+      const rotSpeedX = prefersReducedMotion ? 0.00005 : 0.00018;
+      const rotSpeedY = prefersReducedMotion ? 0.0001 : 0.00045;
+
+      particles.rotation.x += rotSpeedX;
+      particles.rotation.y += rotSpeedY;
+
+      if (!isMobile) {
+        camera.position.x += (mouseX - camera.position.x) * 0.04;
+        camera.position.y += (-mouseY - camera.position.y) * 0.04;
+      }
       camera.lookAt(scene.position);
       renderer.render(scene, camera);
     };
 
+    // Pause rendering when tab is inactive to save 100% CPU/battery
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        isPaused = true;
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      } else {
+        if (isPaused) {
+          isPaused = false;
+          animate();
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Initial start
     animate();
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('resize', onWindowResize);
-      document.removeEventListener('mousemove', onDocumentMouseMove);
+      if (!isMobile) {
+        document.removeEventListener('mousemove', onDocumentMouseMove);
+      }
       geometry.dispose();
       material.dispose();
       renderer.dispose();
     };
   }, []);
 
-  return <canvas id="bgCanvas" ref={canvasRef} className="fixed top-0 left-0 w-screen h-screen -z-10" />;
+  return <canvas id="bgCanvas" ref={canvasRef} className="fixed top-0 left-0 w-screen h-screen -z-10 pointer-events-none" />;
 }

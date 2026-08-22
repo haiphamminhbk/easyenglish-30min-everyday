@@ -20,13 +20,15 @@ import {
   setStoredMode,
   loadAllDiaryEntries,
 } from '@/lib/storage';
-import NoteModal from '@/components/NoteModal';
-import NameModal from '@/components/NameModal';
+import dynamic from 'next/dynamic';
 import ThemeToggle from '@/components/ThemeToggle';
 import ModeToggle from '@/components/ModeToggle';
-import ConfettiEffect from '@/components/ConfettiEffect';
-import DiaryFlipBook from '@/components/DiaryFlipBook';
-import SpotifyPlayerWidget from '@/components/SpotifyPlayerWidget';
+
+const NoteModal = dynamic(() => import('@/components/NoteModal'), { ssr: false });
+const NameModal = dynamic(() => import('@/components/NameModal'), { ssr: false });
+const ConfettiEffect = dynamic(() => import('@/components/ConfettiEffect'), { ssr: false });
+const DiaryFlipBook = dynamic(() => import('@/components/DiaryFlipBook'), { ssr: false });
+const SpotifyPlayerWidget = dynamic(() => import('@/components/SpotifyPlayerWidget'), { ssr: false });
 
 export default function TrackerPage() {
   const router = useRouter();
